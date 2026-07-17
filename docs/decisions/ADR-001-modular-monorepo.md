@@ -28,6 +28,7 @@ Use a TypeScript Turborepo monorepo with separate applications and shared packag
 - `packages/analytics`
 - `packages/execution`
 - `packages/shared`
+- `packages/database`
 
 ## Alternatives considered
 

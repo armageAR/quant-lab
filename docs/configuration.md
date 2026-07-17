@@ -22,7 +22,7 @@ Environment files are input mechanisms, not the configuration API. Each applicat
 
 | Area      | Variables                                                  | Notes                                                                               |
 | --------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Runtime   | `NODE_ENV`, `PORT`                                         | Service names are owned by each app; `PORT` is app-specific where needed.            |
+| Runtime   | `NODE_ENV`, `PORT`, `WORKER_HEALTH_PORT`                   | Service names are app-owned; operational ports are app-specific.                     |
 | Database  | `DATABASE_URL`                                             | Required for applications that persist data. Never log it.                          |
 | Logging   | `LOG_LEVEL`, `LOG_FORMAT`                                  | Validate against explicit enums.                                                    |
 | Binance   | `BINANCE_API_KEY`, `BINANCE_API_SECRET`, `BINANCE_SANDBOX` | Credentials are required only for authenticated capabilities.                       |
