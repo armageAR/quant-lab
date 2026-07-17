@@ -44,7 +44,7 @@ function canonical(value: Decimal): DecimalString {
 
 function requireContext(value: string, field: string): string {
   const normalized = value.trim().toUpperCase();
-  if (!/^[A-Z0-9][A-Z0-9._:-]{0,63}$/.test(normalized)) {
+  if (!/^[\p{L}\p{N}][\p{L}\p{N}._:/-]{0,63}$/u.test(normalized)) {
     throw new TypeError(`${field} is invalid`);
   }
   return normalized;

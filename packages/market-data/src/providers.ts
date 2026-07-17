@@ -69,6 +69,7 @@ export interface CredentialPermissions {
   read: boolean;
   trade: boolean;
   withdraw: boolean;
+  accountMutation: boolean;
   observedAt: SourceTimestamp;
 }
 

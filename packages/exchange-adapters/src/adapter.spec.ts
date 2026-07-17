@@ -25,6 +25,7 @@ function fakeClient(
     enableReading: true,
     enableSpotAndMarginTrading: false,
     enableWithdrawals: false,
+    enableInternalTransfer: false,
   },
 ): ReadOnlyCcxtClient {
   return {
@@ -99,6 +100,7 @@ describe('CCXT read-only exchange adapter', () => {
         enableReading: true,
         enableSpotAndMarginTrading: true,
         enableWithdrawals: true,
+        enableInternalTransfer: true,
       }),
     );
     await expect(subject.getAccountStatus()).rejects.toMatchObject({

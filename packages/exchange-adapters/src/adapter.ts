@@ -136,6 +136,8 @@ export class CcxtReadOnlyExchangeAdapter implements AuthenticatedAccountReadProv
     if (permissions.trade) warnings.push('API key has trading permission');
     if (permissions.withdraw)
       warnings.push('API key has withdrawal permission');
+    if (permissions.accountMutation)
+      warnings.push('API key has another account-mutation permission');
     if (!permissions.read)
       warnings.push('API key does not expose required read permission');
     if (warnings.length > 0) {
@@ -375,6 +377,9 @@ export class CcxtReadOnlyExchangeAdapter implements AuthenticatedAccountReadProv
           record.enableMargin === true ||
           record.enableFutures === true,
         withdraw: record.enableWithdrawals === true,
+        accountMutation:
+          record.enableInternalTransfer === true ||
+          record.permitsUniversalTransfer === true,
         observedAt,
       };
     }
@@ -392,6 +397,8 @@ export class CcxtReadOnlyExchangeAdapter implements AuthenticatedAccountReadProv
         values.includes('withdraw-funds') ||
         values.includes('add-withdraw-address') ||
         values.includes('update-withdraw-address'),
+      accountMutation:
+        values.includes('add-funds') || values.includes('earn-funds'),
       observedAt,
     };
   }

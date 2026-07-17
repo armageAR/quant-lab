@@ -29,7 +29,7 @@ CCXT should provide the same broad contract used for Binance:
 
 ## Phase 2 safety
 
-The adapter calls Kraken `GetApiKeyInfo` before authenticated account reads and rejects `modify-trades`, `close-trades`, withdrawal, or withdrawal-address permissions. Kraken Spot has no CCXT sandbox endpoint; `KRAKEN_SANDBOX=true` is rejected instead of silently connecting to production.
+The adapter calls Kraken `GetApiKeyInfo` before authenticated account reads and rejects trading, cancellation, deposits, Earn, withdrawals, or withdrawal-address permissions. Kraken Spot has no CCXT sandbox endpoint; `KRAKEN_SANDBOX=true` is rejected instead of silently connecting to production.
 
 ## WebSocket use cases
 

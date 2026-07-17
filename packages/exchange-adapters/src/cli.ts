@@ -1,9 +1,13 @@
-import 'dotenv/config';
+import { resolve } from 'node:path';
+
+import { config as loadEnvironment } from 'dotenv';
 
 import { ProviderError } from '@quant-lab/market-data';
 
 import { CcxtReadOnlyExchangeAdapter } from './adapter';
 import { loadConnectivityConfig, venueConfig } from './config';
+
+loadEnvironment({ path: resolve(__dirname, '../../../.env'), quiet: true });
 
 async function main(): Promise<void> {
   const config = loadConnectivityConfig(process.env);

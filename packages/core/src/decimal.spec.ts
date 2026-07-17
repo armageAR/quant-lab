@@ -9,6 +9,7 @@ describe('exact decimal values', () => {
     ).toEqual({ value: '0.3', currency: 'USD' });
     expect(Price.from('0001.2300', 'btc-usd').toString()).toBe('1.23');
     expect(Pnl.from('-0.00000001', 'USD').toString()).toBe('-0.00000001');
+    expect(Money.from('0', '币安人生').currency).toBe('币安人生');
     expect(JSON.parse(JSON.stringify(Price.from('1.23', 'BTC-USD')))).toEqual({
       value: '1.23',
       marketId: 'BTC-USD',

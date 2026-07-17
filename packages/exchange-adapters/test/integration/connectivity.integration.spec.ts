@@ -29,6 +29,7 @@ for (const venue of ['binance', 'kraken'] as const) {
             read: true,
             trade: false,
             withdraw: false,
+            accountMutation: false,
           });
           expect(report.marketCount).toBeGreaterThan(0);
         } finally {

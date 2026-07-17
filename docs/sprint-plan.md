@@ -158,7 +158,7 @@ Acceptance:
 
 ### Sprint 2.2: Authenticated Binance and Kraken adapters
 
-**Status:** implementation complete on branch `agent/sprint-2-2-exchange-adapters`. Real authenticated acceptance remains pending until read-only credentials are configured locally for both venues and `pnpm exchange:check` succeeds.
+**Status:** complete on branch `agent/sprint-2-2-exchange-adapters`. Local credential-backed acceptance passed for read-only Binance and Kraken access; credentials and balance values remain outside version control and CI.
 
 **Goal:** prove real read-only connectivity to both venues.
 

@@ -1,11 +1,11 @@
 {
     "schema_version": 2,
-    "commit": "fcd8e9cf0aa20060f1f17721bdb8e017d245f5f4",
-    "indexed_at": "2026-07-17T15:17:16Z",
+    "commit": "6a1cac7d38aa2e3702c257b1f193f6b4f5927ba2",
+    "indexed_at": "2026-07-17T16:25:47Z",
     "project": "quant-lab",
-    "nodes": 1179,
-    "edges": 1756,
+    "nodes": 1133,
+    "edges": 1713,
     "original_size": 3080192,
-    "compressed_size": 465285,
+    "compressed_size": 462493,
     "compression_level": 3
 }
