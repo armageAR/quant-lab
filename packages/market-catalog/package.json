@@ -1,0 +1,26 @@
+{
+  "name": "@quant-lab/market-catalog",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "lint": "eslint src test --max-warnings=0",
+    "test": "vitest run src",
+    "test:integration": "vitest run test/integration",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "@quant-lab/core": "workspace:*",
+    "@quant-lab/database": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.27",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}

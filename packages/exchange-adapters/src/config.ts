@@ -20,15 +20,19 @@ const exchangeCredentials = z
 
 export const connectivityConfigSchema = z.object({
   EXCHANGE_CONNECTIVITY_ENABLED: booleanValue.default(false),
-  EXCHANGE_MARKETS: z
-    .string()
-    .default('BTC/USDT,BTC/USD')
-    .transform((value) =>
-      value
-        .split(',')
-        .map((market) => market.trim().toUpperCase())
-        .filter(Boolean),
-    ),
+  EXCHANGE_MARKETS: z.preprocess(
+    (value) =>
+      typeof value === 'string' && value.trim() === '' ? undefined : value,
+    z
+      .string()
+      .default('BTC/USDT,BTC/USD')
+      .transform((value) =>
+        value
+          .split(',')
+          .map((market) => market.trim().toUpperCase())
+          .filter(Boolean),
+      ),
+  ),
   EXCHANGE_TIMEOUT_MS: z.coerce
     .number()
     .int()

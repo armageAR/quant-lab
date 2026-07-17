@@ -33,3 +33,9 @@ Market data and event logs can grow quickly. The design should account for:
 - keep the schema aligned with the domain model and provider contracts;
 - do not encode venue-specific quirks into every table if a normalized model can hold them;
 - avoid treating Prisma models as the business model by default.
+
+## Market catalog schema
+
+Sprint 2.3 adds normalized `Venue`, `Instrument`, and `Market` records. `MarketAlias` preserves venue-symbol history, while `TradingRuleVersion`, `FeeScheduleVersion`, and `CapabilitySnapshot` use content fingerprints so repeated refreshes are idempotent and metadata changes remain auditable.
+
+Missing allowlisted markets are marked inactive; their aliases and version history are not deleted. Prices, quantities, notionals, and fees use `Decimal(38,18)` in PostgreSQL and are exposed as decimal strings.

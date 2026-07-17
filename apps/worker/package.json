@@ -6,6 +6,7 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
+    "catalog:refresh": "node dist/catalog-refresh.js",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -14,6 +15,8 @@
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
     "@quant-lab/database": "workspace:*",
+    "@quant-lab/exchange-adapters": "workspace:*",
+    "@quant-lab/market-catalog": "workspace:*",
     "@quant-lab/shared": "workspace:*",
     "dotenv": "^17.2.3",
     "pino": "^10.1.0",

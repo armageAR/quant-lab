@@ -30,3 +30,9 @@ The API is the orchestration layer for Quant Lab. It exposes platform capabiliti
 ## Authentication
 
 Authentication and authorization are future work, but the API should be designed so protected routes and role-based access can be added without reshaping the surface.
+
+## Implemented market endpoints
+
+- `GET /markets/comparable` returns active spot markets whose canonical instrument is available on at least two venues.
+- Each result includes the venue symbol, canonical symbol, current trading constraints, and current effective maker/taker fees as decimal strings.
+- Historical rule and fee versions remain internal persistence records; this endpoint intentionally returns only the latest version.
