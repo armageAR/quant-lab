@@ -39,3 +39,9 @@ Market data and event logs can grow quickly. The design should account for:
 Sprint 2.3 adds normalized `Venue`, `Instrument`, and `Market` records. `MarketAlias` preserves venue-symbol history, while `TradingRuleVersion`, `FeeScheduleVersion`, and `CapabilitySnapshot` use content fingerprints so repeated refreshes are idempotent and metadata changes remain auditable.
 
 Missing allowlisted markets are marked inactive; their aliases and version history are not deleted. Prices, quantities, notionals, and fees use `Decimal(38,18)` in PostgreSQL and are exposed as decimal strings.
+
+## Market time series
+
+`RawMarketEnvelope` preserves source evidence and checksums. `MarketTicker`, `MarketTrade`, and `MarketCandle` reference the raw envelope ID and use deterministic idempotency keys. All records retain event, receipt, and processing time when the source supplies event time. `ClockDriftMeasurement` stores venue drift and request round-trip samples independently.
+
+The default retention window is 90 days. Normalized rows are deleted before their corresponding raw envelopes. Dataset pinning is introduced in Sprint 2.6 and must run before retention for research evidence that needs a longer lifetime.

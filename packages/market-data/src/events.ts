@@ -14,6 +14,7 @@ export interface MarketEvent {
   marketId: string;
   time: EventTimepoint;
   source: string;
+  sourcePayload?: unknown;
 }
 
 export interface Ticker extends MarketEvent {

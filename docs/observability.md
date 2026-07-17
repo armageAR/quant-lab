@@ -58,3 +58,4 @@ Liveness indicates that the process event loop and operational server respond. R
 - spread anomalies;
 - latency spikes;
 - normalization failures.
+Market ingestion exports `quant_lab_ingested_events_total`, `quant_lab_ingestion_duplicates_total`, `quant_lab_ingestion_gaps_total`, `quant_lab_ingestion_rejected_total`, and `quant_lab_ingestion_lag_seconds`. Labels are bounded to venue and event type; market symbols are intentionally excluded to avoid unbounded cardinality.

@@ -7,6 +7,9 @@
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "catalog:refresh": "node dist/catalog-refresh.js",
+    "market:ingest": "node dist/market-ingest.js",
+    "market:stream": "node dist/market-stream.js",
+    "market:retain": "node dist/market-retain.js",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -17,6 +20,7 @@
     "@quant-lab/database": "workspace:*",
     "@quant-lab/exchange-adapters": "workspace:*",
     "@quant-lab/market-catalog": "workspace:*",
+    "@quant-lab/market-ingestion": "workspace:*",
     "@quant-lab/shared": "workspace:*",
     "dotenv": "^17.2.3",
     "pino": "^10.1.0",

@@ -3,11 +3,13 @@ import {
   Money,
   Quantity,
   SourceTimestamp,
+  eventTimepoint,
   type Balance,
   type FeeSnapshot,
   type Market,
   type TradingRules,
   type Venue,
+  Price,
 } from '@quant-lab/core';
 import {
   ProviderError,
@@ -16,12 +18,15 @@ import {
   type AuthenticatedAccountReadProvider,
   type ClockDriftSample,
   type CredentialPermissions,
+  type ProviderSubscription,
 } from '@quant-lab/market-data';
+import type { Candle, Ticker, Trade } from '@quant-lab/market-data';
 
 import type { CcxtMarket, CcxtTradingFee, ReadOnlyCcxtClient } from './client';
 import type { VenueAdapterConfig } from './config';
 import { createCcxtReadOnlyClient } from './factory';
 import { ResilientExecutor } from './resilience';
+import { NativeTickerWebSocket } from './ticker-websocket';
 
 type RecordValue = Record<string, unknown>;
 
@@ -200,6 +205,186 @@ export class CcxtReadOnlyExchangeAdapter implements AuthenticatedAccountReadProv
         status: market.active === false ? 'inactive' : 'active',
         spot: true,
       }));
+  }
+
+  async fetchTicker(marketId: string): Promise<Ticker> {
+    const market = this.findMarket(await this.loadMarkets(), marketId);
+    const value = await this.#executor.run('fetchTicker', () =>
+      this.#client.fetchTicker(market.symbol),
+    );
+    const now = this.#wallClock();
+    const event =
+      value.timestamp === undefined
+        ? undefined
+        : timestampFromMilliseconds(value.timestamp);
+    return {
+      venueId: this.venue.id,
+      marketId: this.marketId(market),
+      source: 'rest',
+      sourcePayload: value,
+      time: eventTimepoint({
+        ...(event ? { eventTime: event } : {}),
+        receivedAt: now,
+        processedAt: this.#wallClock(),
+      }),
+      ...(value.bid
+        ? { bid: Price.from(value.bid, this.marketId(market)) }
+        : {}),
+      ...(value.bidVolume
+        ? {
+            bidQuantity: Quantity.from(
+              value.bidVolume,
+              `${market.base}-${market.quote}`,
+            ),
+          }
+        : {}),
+      ...(value.ask
+        ? { ask: Price.from(value.ask, this.marketId(market)) }
+        : {}),
+      ...(value.askVolume
+        ? {
+            askQuantity: Quantity.from(
+              value.askVolume,
+              `${market.base}-${market.quote}`,
+            ),
+          }
+        : {}),
+      ...(value.last
+        ? { last: Price.from(value.last, this.marketId(market)) }
+        : {}),
+    };
+  }
+
+  async fetchTrades(
+    marketId: string,
+    since?: number,
+    limit = 100,
+  ): Promise<readonly Trade[]> {
+    const market = this.findMarket(await this.loadMarkets(), marketId);
+    const received = this.#wallClock();
+    const values = await this.#executor.run('fetchTrades', () =>
+      this.#client.fetchTrades(market.symbol, since, Math.min(limit, 1000)),
+    );
+    return values
+      .filter((v) => v.side === 'buy' || v.side === 'sell')
+      .map((v) => {
+        const event =
+          v.timestamp === undefined
+            ? undefined
+            : timestampFromMilliseconds(v.timestamp);
+        return {
+          venueId: this.venue.id,
+          marketId: this.marketId(market),
+          tradeId: v.id,
+          side: v.side as 'buy' | 'sell',
+          price: Price.from(v.price, this.marketId(market)),
+          quantity: Quantity.from(v.amount, `${market.base}-${market.quote}`),
+          source: 'rest',
+          sourcePayload: v,
+          time: eventTimepoint({
+            ...(event ? { eventTime: event } : {}),
+            receivedAt: received,
+            processedAt: this.#wallClock(),
+          }),
+        };
+      });
+  }
+
+  async fetchCandles(
+    marketId: string,
+    interval: string,
+    since?: number,
+    limit = 100,
+  ): Promise<readonly Candle[]> {
+    const market = this.findMarket(await this.loadMarkets(), marketId);
+    const received = this.#wallClock();
+    const duration: Record<string, number> = {
+      '1m': 60000,
+      '5m': 300000,
+      '1h': 3600000,
+      '1d': 86400000,
+    };
+    const step = duration[interval];
+    if (!step) throw new TypeError('unsupported candle interval');
+    const values = await this.#executor.run('fetchOHLCV', () =>
+      this.#client.fetchOHLCV(
+        market.symbol,
+        interval,
+        since,
+        Math.min(limit, 1000),
+      ),
+    );
+    return values.map((v) => ({
+      venueId: this.venue.id,
+      marketId: this.marketId(market),
+      interval,
+      openedAt: timestampFromMilliseconds(v[0]),
+      closedAt: timestampFromMilliseconds(v[0] + step),
+      open: Price.from(v[1], this.marketId(market)),
+      high: Price.from(v[2], this.marketId(market)),
+      low: Price.from(v[3], this.marketId(market)),
+      close: Price.from(v[4], this.marketId(market)),
+      volume: Quantity.from(v[5], `${market.base}-${market.quote}`),
+      source: 'rest',
+      sourcePayload: v,
+      time: eventTimepoint({
+        eventTime: timestampFromMilliseconds(v[0]),
+        receivedAt: received,
+        processedAt: this.#wallClock(),
+      }),
+    }));
+  }
+
+  async subscribeTickers(
+    marketIds: readonly string[],
+    onTicker: (ticker: Ticker) => void | Promise<void>,
+  ): Promise<ProviderSubscription> {
+    const available = await this.listMarkets();
+    const selected = marketIds.map((id) => {
+      const market = available.find(
+        (value) => value.id === id || value.venueSymbol === id,
+      );
+      if (!market)
+        throw new ProviderError('spot market was not found', {
+          code: 'not-found',
+          venueId: this.venue.id,
+          operation: 'subscribeTickers',
+          retryable: false,
+        });
+      return market;
+    });
+    return new NativeTickerWebSocket({
+      venue: this.venue,
+      markets: selected,
+      onTicker,
+    });
+  }
+
+  async subscribeTickersWithTelemetry(
+    marketIds: readonly string[],
+    onTicker: (ticker: Ticker) => void | Promise<void>,
+    telemetry: { onGap?: () => void; onRejected?: () => void },
+  ): Promise<ProviderSubscription> {
+    const available = await this.listMarkets();
+    const selected = marketIds.map((id) => {
+      const market = available.find(
+        (value) => value.id === id || value.venueSymbol === id,
+      );
+      if (!market)
+        throw new ProviderError('spot market was not found', {
+          code: 'not-found',
+          venueId: this.venue.id,
+          operation: 'subscribeTickers',
+          retryable: false,
+        });
+      return market;
+    });
+    return new NativeTickerWebSocket({
+      venue: this.venue,
+      markets: selected,
+      onTicker,
+      ...telemetry,
+    });
   }
 
   async getTradingRules(marketId: string): Promise<TradingRules> {

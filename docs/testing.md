@@ -90,3 +90,14 @@ Quant Lab should favor deterministic, reproducible tests over brittle integratio
 - exposure limits;
 - kill-switch behavior;
 - live execution gating.
+Sprint 2.4 adds PostgreSQL integration coverage for idempotency and raw-envelope traceability, local WebSocket-server tests for normalization and reconnect, and explicit credential-backed commands for live validation. CI never requires personal exchange credentials.
+
+The supported live acceptance sequence is:
+
+```bash
+pnpm catalog:refresh
+pnpm market:ingest
+INGESTION_STREAM_DURATION_MS=60000 pnpm market:stream
+```
+
+Both venue results must contain messages, while gaps and rejected messages must remain visible rather than being silently discarded.

@@ -26,6 +26,7 @@ Environment files are input mechanisms, not the configuration API. Each applicat
 | Database  | `DATABASE_URL`                                             | Required for applications that persist data. Never log it.                          |
 | Logging   | `LOG_LEVEL`, `LOG_FORMAT`                                  | Validate against explicit enums.                                                    |
 | Exchanges | `EXCHANGE_CONNECTIVITY_ENABLED`, `EXCHANGE_MARKETS`, `EXCHANGE_TIMEOUT_MS`, `EXCHANGE_RETRY_ATTEMPTS`, `EXCHANGE_CIRCUIT_FAILURES`, `EXCHANGE_CIRCUIT_RESET_MS` | Authenticated diagnostics require explicit enablement and bounded resilience settings. |
+| Ingestion | `INGESTION_STREAM_DURATION_MS`, `MARKET_DATA_RETENTION_DAYS` | Bounds WebSocket validation windows and raw/normalized retention; defaults are 60 seconds and 90 days. |
 | Binance   | `BINANCE_API_KEY`, `BINANCE_API_SECRET`, `BINANCE_SANDBOX`, `BINANCE_INTEGRATION_ENABLED` | Credentials are paired; integration tests are explicit opt-in. |
 | Kraken    | `KRAKEN_API_KEY`, `KRAKEN_API_SECRET`, `KRAKEN_SANDBOX`, `KRAKEN_INTEGRATION_ENABLED` | Kraken Spot has no sandbox in CCXT, so `KRAKEN_SANDBOX` must remain `false`. |
 | Execution | `LIVE_EXECUTION_ENABLED`                                   | Must default to `false`; enabling it is necessary but not sufficient to trade live. |
@@ -74,6 +75,14 @@ pnpm catalog:refresh
 ```
 
 The command requires connectivity plus at least one enabled integration. It reads public market definitions and authenticated effective fees, versions changes to rules, fees, and capabilities, and never calls an order API.
+
+Market data commands are also read-only at the exchange boundary:
+
+```bash
+pnpm market:ingest  # REST ticker/trade/candle backfill plus clock drift
+pnpm market:stream  # concurrent Binance/Kraken public WebSockets
+pnpm market:retain  # remove raw and normalized events older than retention
+```
 
 ## Unsafe defaults
 

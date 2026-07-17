@@ -36,3 +36,7 @@ Authentication and authorization are future work, but the API should be designed
 - `GET /markets/comparable` returns active spot markets whose canonical instrument is available on at least two venues.
 - Each result includes the venue symbol, canonical symbol, current trading constraints, and current effective maker/taker fees as decimal strings.
 - Historical rule and fee versions remain internal persistence records; this endpoint intentionally returns only the latest version.
+- `GET /markets/tickers?canonicalSymbol=BTC/USDT&from=...&to=...&limit=...&cursor=...` returns normalized ticker history; `marketId` scopes one venue.
+- `GET /markets/trades?canonicalSymbol=BTC/USDT&from=...&to=...&limit=...&cursor=...` returns cross-venue normalized trade history. `marketId` remains available for one venue market.
+- `GET /markets/candles?canonicalSymbol=BTC/USDT&interval=1m&from=...&to=...&limit=...&cursor=...` returns normalized candle history; `marketId` scopes one venue.
+- Historical page sizes are required to remain between 1 and 500.

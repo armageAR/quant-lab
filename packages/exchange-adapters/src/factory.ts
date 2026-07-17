@@ -11,6 +11,14 @@ type PermissionAwareExchange = {
   fetchTime(): Promise<number>;
   fetchBalance(): Promise<unknown>;
   fetchTradingFees(): Promise<unknown>;
+  fetchTicker(symbol: string): Promise<unknown>;
+  fetchTrades(symbol: string, since?: number, limit?: number): Promise<unknown>;
+  fetchOHLCV(
+    symbol: string,
+    timeframe: string,
+    since?: number,
+    limit?: number,
+  ): Promise<unknown>;
   setSandboxMode(enabled: boolean): void;
   close(): Promise<void>;
   sapiGetAccountApiRestrictions?: () => Promise<unknown>;
@@ -47,6 +55,11 @@ export function createCcxtReadOnlyClient(
     fetchTime: () => exchange.fetchTime(),
     fetchBalance: () => exchange.fetchBalance() as never,
     fetchTradingFees: () => exchange.fetchTradingFees() as never,
+    fetchTicker: (symbol) => exchange.fetchTicker(symbol) as never,
+    fetchTrades: (symbol, since, limit) =>
+      exchange.fetchTrades(symbol, since, limit) as never,
+    fetchOHLCV: (symbol, timeframe, since, limit) =>
+      exchange.fetchOHLCV(symbol, timeframe, since, limit) as never,
     inspectPermissions,
     close: () => exchange.close(),
   };

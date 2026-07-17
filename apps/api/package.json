@@ -16,6 +16,7 @@
     "@nestjs/platform-express": "^11.1.11",
     "@quant-lab/database": "workspace:*",
     "@quant-lab/market-catalog": "workspace:*",
+    "@quant-lab/market-ingestion": "workspace:*",
     "@quant-lab/shared": "workspace:*",
     "dotenv": "^17.2.3",
     "pino-http": "^11.0.0",
