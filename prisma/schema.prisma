@@ -8,14 +8,114 @@ datasource db {
 }
 
 model PlatformEvent {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
   source      String
   eventType   String
   eventTime   DateTime? @db.Timestamptz(6)
-  receivedAt DateTime  @db.Timestamptz(6)
+  receivedAt  DateTime  @db.Timestamptz(6)
   processedAt DateTime? @db.Timestamptz(6)
   payload     Json
-  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
 
   @@index([source, eventType, eventTime])
+}
+
+model Venue {
+  id           String               @id
+  code         String               @unique
+  name         String
+  kind         String
+  status       String
+  createdAt    DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime             @updatedAt @db.Timestamptz(6)
+  markets      Market[]
+  aliases      MarketAlias[]
+  capabilities CapabilitySnapshot[]
+}
+
+model Instrument {
+  id              String   @id
+  kind            String
+  baseCurrency    String
+  quoteCurrency   String
+  canonicalSymbol String   @unique
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+  markets         Market[]
+}
+
+model Market {
+  id           String               @id
+  venueId      String
+  instrumentId String
+  venueSymbol  String
+  status       String
+  spot         Boolean
+  firstSeenAt  DateTime             @db.Timestamptz(6)
+  lastSeenAt   DateTime             @db.Timestamptz(6)
+  createdAt    DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime             @updatedAt @db.Timestamptz(6)
+  venue        Venue                @relation(fields: [venueId], references: [id])
+  instrument   Instrument           @relation(fields: [instrumentId], references: [id])
+  aliases      MarketAlias[]
+  tradingRules TradingRuleVersion[]
+  feeSchedules FeeScheduleVersion[]
+
+  @@unique([venueId, venueSymbol])
+  @@index([instrumentId, status, spot])
+}
+
+model MarketAlias {
+  id        String    @id @default(uuid()) @db.Uuid
+  venueId   String
+  marketId  String
+  alias     String
+  validFrom DateTime  @db.Timestamptz(6)
+  validTo   DateTime? @db.Timestamptz(6)
+  venue     Venue     @relation(fields: [venueId], references: [id])
+  market    Market    @relation(fields: [marketId], references: [id])
+
+  @@unique([venueId, alias, validFrom])
+  @@index([marketId, validTo])
+}
+
+model TradingRuleVersion {
+  id                String   @id @default(uuid()) @db.Uuid
+  marketId          String
+  fingerprint       String
+  priceIncrement    Decimal  @db.Decimal(38, 18)
+  quantityIncrement Decimal  @db.Decimal(38, 18)
+  minimumQuantity   Decimal? @db.Decimal(38, 18)
+  maximumQuantity   Decimal? @db.Decimal(38, 18)
+  minimumNotional   Decimal? @db.Decimal(38, 18)
+  effectiveAt       DateTime @db.Timestamptz(6)
+  market            Market   @relation(fields: [marketId], references: [id])
+
+  @@unique([marketId, fingerprint])
+  @@index([marketId, effectiveAt])
+}
+
+model FeeScheduleVersion {
+  id          String   @id @default(uuid()) @db.Uuid
+  marketId    String
+  fingerprint String
+  maker       Decimal  @db.Decimal(38, 18)
+  taker       Decimal  @db.Decimal(38, 18)
+  source      String
+  effectiveAt DateTime @db.Timestamptz(6)
+  market      Market   @relation(fields: [marketId], references: [id])
+
+  @@unique([marketId, fingerprint])
+  @@index([marketId, effectiveAt])
+}
+
+model CapabilitySnapshot {
+  id           String   @id @default(uuid()) @db.Uuid
+  venueId      String
+  fingerprint  String
+  capabilities Json
+  observedAt   DateTime @db.Timestamptz(6)
+  venue        Venue    @relation(fields: [venueId], references: [id])
+
+  @@unique([venueId, fingerprint])
+  @@index([venueId, observedAt])
 }

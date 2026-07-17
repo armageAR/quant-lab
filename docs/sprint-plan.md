@@ -181,6 +181,8 @@ Acceptance:
 
 ### Sprint 2.3: Market catalog and symbol normalization
 
+**Status:** complete. The Prisma catalog, canonical aliases, versioned metadata refresh, authenticated one-shot job, and comparable-market API are implemented and covered by PostgreSQL integration fixtures.
+
 **Goal:** identify comparable spot markets deterministically.
 
 Tasks:

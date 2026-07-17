@@ -62,6 +62,19 @@ The command requires `EXCHANGE_CONNECTIVITY_ENABLED=true`, both venue credential
 
 Set `BINANCE_INTEGRATION_ENABLED=true` or `KRAKEN_INTEGRATION_ENABLED=true` only to opt that venue into `pnpm test:exchange`. These tests are skipped in CI because personal credentials are never CI inputs.
 
+## Market catalog
+
+`EXCHANGE_MARKETS` is the comma-separated canonical spot allowlist used by the catalog. An unset or blank value safely falls back to `BTC/USDT,BTC/USD`; unsupported venue symbols are ignored rather than persisted as partially normalized instruments.
+
+Apply migrations and run a one-shot authenticated metadata refresh from the repository root:
+
+```bash
+pnpm db:deploy
+pnpm catalog:refresh
+```
+
+The command requires connectivity plus at least one enabled integration. It reads public market definitions and authenticated effective fees, versions changes to rules, fees, and capabilities, and never calls an order API.
+
 ## Unsafe defaults
 
 Do not default to live endpoints, live execution, permissive CORS, disabled authentication, unbounded retries, unlimited order size, or placeholder secrets. When a safe value cannot be inferred, require configuration and fail startup.

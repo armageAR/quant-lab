@@ -41,7 +41,7 @@ Completion indicators:
 
 ## Phase 2: Market data foundation
 
-Status: in progress. Sprints 2.1 and 2.2 are complete, including local credential-backed read-only acceptance for Binance and Kraken.
+Status: in progress. Sprints 2.1 through 2.3 are complete, including local credential-backed read-only acceptance, normalized market catalogs, and comparable spot-market queries for Binance and Kraken.
 
 Scope:
 - `MarketDataProvider`;
