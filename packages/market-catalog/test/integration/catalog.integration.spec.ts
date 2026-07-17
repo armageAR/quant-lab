@@ -117,6 +117,8 @@ describe('MarketCatalog integration', () => {
     await database.client.marketTicker.deleteMany();
     await database.client.marketTrade.deleteMany();
     await database.client.marketCandle.deleteMany();
+    await database.client.orderBookInvalidation.deleteMany();
+    await database.client.marketOrderBookEvent.deleteMany();
     await database.client.rawMarketEnvelope.deleteMany();
     await database.client.clockDriftMeasurement.deleteMany();
     await database.client.feeScheduleVersion.deleteMany();

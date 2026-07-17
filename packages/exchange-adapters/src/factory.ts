@@ -19,6 +19,7 @@ type PermissionAwareExchange = {
     since?: number,
     limit?: number,
   ): Promise<unknown>;
+  fetchOrderBook(symbol: string, limit?: number): Promise<unknown>;
   setSandboxMode(enabled: boolean): void;
   close(): Promise<void>;
   sapiGetAccountApiRestrictions?: () => Promise<unknown>;
@@ -60,6 +61,8 @@ export function createCcxtReadOnlyClient(
       exchange.fetchTrades(symbol, since, limit) as never,
     fetchOHLCV: (symbol, timeframe, since, limit) =>
       exchange.fetchOHLCV(symbol, timeframe, since, limit) as never,
+    fetchOrderBook: (symbol, limit) =>
+      exchange.fetchOrderBook(symbol, limit) as never,
     inspectPermissions,
     close: () => exchange.close(),
   };

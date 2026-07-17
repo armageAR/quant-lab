@@ -41,6 +41,12 @@ export interface CcxtTrade {
   amount: string;
 }
 export type CcxtCandle = [number, string, string, string, string, string];
+export interface CcxtOrderBook {
+  timestamp?: number;
+  nonce?: string | number;
+  bids: Array<[string, string]>;
+  asks: Array<[string, string]>;
+}
 
 export interface ReadOnlyCcxtClient {
   readonly id: string;
@@ -61,6 +67,7 @@ export interface ReadOnlyCcxtClient {
     since?: number,
     limit?: number,
   ): Promise<CcxtCandle[]>;
+  fetchOrderBook?(symbol: string, limit?: number): Promise<CcxtOrderBook>;
   inspectPermissions(): Promise<unknown>;
   close(): Promise<void>;
 }

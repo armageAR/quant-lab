@@ -66,6 +66,13 @@ function fakeClient(
       }),
     fetchTrades: () => Promise.resolve([]),
     fetchOHLCV: () => Promise.resolve([]),
+    fetchOrderBook: () =>
+      Promise.resolve({
+        timestamp: 1_700_000_000_000,
+        nonce: '42',
+        bids: [['100', '2']],
+        asks: [['101', '3']],
+      }),
     inspectPermissions: () => Promise.resolve(permissions),
     close: () => Promise.resolve(),
   };
@@ -116,6 +123,18 @@ describe('CCXT read-only exchange adapter', () => {
       code: 'authorization',
       retryable: false,
     } satisfies Partial<ProviderError>);
+  });
+
+  it('normalizes exact order-book snapshots without floating point conversion', async () => {
+    const snapshot = await adapter().fetchOrderBook('BTC/USDT', 25);
+    expect(snapshot).toMatchObject({
+      venueId: 'BINANCE',
+      marketId: 'BINANCE:BTCUSDT',
+      kind: 'snapshot',
+      sequence: '42',
+    });
+    expect(snapshot.bids[0]?.price.toString()).toBe('100');
+    expect(snapshot.asks[0]?.quantity.toString()).toBe('3');
   });
 
   it('contains no calls to execution or funds-movement methods', () => {

@@ -20,7 +20,7 @@ import {
   type CredentialPermissions,
   type ProviderSubscription,
 } from '@quant-lab/market-data';
-import type { Candle, Ticker, Trade } from '@quant-lab/market-data';
+import type { Candle, OrderBook, Ticker, Trade } from '@quant-lab/market-data';
 
 import type { CcxtMarket, CcxtTradingFee, ReadOnlyCcxtClient } from './client';
 import type { VenueAdapterConfig } from './config';
@@ -333,6 +333,60 @@ export class CcxtReadOnlyExchangeAdapter implements AuthenticatedAccountReadProv
         processedAt: this.#wallClock(),
       }),
     }));
+  }
+
+  async fetchOrderBook(marketId: string, depth = 100): Promise<OrderBook> {
+    if (!this.#client.fetchOrderBook)
+      throw new ProviderError('order-book snapshots are unsupported', {
+        code: 'capability-unavailable',
+        venueId: this.venue.id,
+        operation: 'fetchOrderBook',
+        retryable: false,
+      });
+    const market = this.findMarket(await this.loadMarkets(), marketId);
+    const receivedAt = this.#wallClock();
+    const value = await this.#executor.run('fetchOrderBook', () =>
+      this.#client.fetchOrderBook!(
+        market.symbol,
+        Math.max(1, Math.min(depth, 1000)),
+      ),
+    );
+    const sequence =
+      value.nonce === undefined
+        ? receivedAt.epochMicroseconds.toString()
+        : String(value.nonce);
+    const normalize = (side: 'bid' | 'ask', values: Array<[string, string]>) =>
+      values.map(([price, quantity]) => ({
+        side,
+        price: Price.from(
+          exactString(price, 'orderBook.price'),
+          this.marketId(market),
+        ),
+        quantity: Quantity.from(
+          exactString(quantity, 'orderBook.quantity'),
+          `${market.base}-${market.quote}`,
+        ),
+      }));
+    const eventTime =
+      value.timestamp === undefined
+        ? undefined
+        : timestampFromMilliseconds(value.timestamp);
+    return {
+      venueId: this.venue.id,
+      marketId: this.marketId(market),
+      source: 'rest',
+      sourcePayload: value,
+      kind: 'snapshot',
+      sequence,
+      bids: normalize('bid', value.bids),
+      asks: normalize('ask', value.asks),
+      time: eventTimepoint({
+        ...(eventTime ? { eventTime } : {}),
+        receivedAt,
+        processedAt: this.#wallClock(),
+        sequence,
+      }),
+    };
   }
 
   async subscribeTickers(

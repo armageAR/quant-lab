@@ -1,6 +1,11 @@
-import { Price, SourceTimestamp, eventTimepoint } from '@quant-lab/core';
+import {
+  Price,
+  Quantity,
+  SourceTimestamp,
+  eventTimepoint,
+} from '@quant-lab/core';
 import { DatabaseLifecycle } from '@quant-lab/database';
-import type { Ticker } from '@quant-lab/market-data';
+import type { OrderBook, Ticker } from '@quant-lab/market-data';
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -10,6 +15,8 @@ const db = new DatabaseLifecycle();
 describe('MarketEventStore integration', () => {
   beforeAll(async () => {
     await db.connect();
+    await db.client.orderBookInvalidation.deleteMany();
+    await db.client.marketOrderBookEvent.deleteMany();
     await db.client.marketTicker.deleteMany();
     await db.client.rawMarketEnvelope.deleteMany();
     await db.client.venue.upsert({
@@ -78,6 +85,58 @@ describe('MarketEventStore integration', () => {
       eventType: 'ticker',
       marketId: ticker.marketId,
       payload: { venueField: 'original' },
+    });
+  });
+
+  it('persists and reconstructs snapshot plus ordered deltas', async () => {
+    const observed = SourceTimestamp.fromEpochMilliseconds('1700000000000');
+    const level = (side: 'bid' | 'ask', price: string, quantity: string) => ({
+      side,
+      price: Price.from(price, 'TEST:BTCUSD'),
+      quantity: Quantity.from(quantity, 'BTC-USD'),
+    });
+    const base: OrderBook = {
+      venueId: 'TEST',
+      marketId: 'TEST:BTCUSD',
+      source: 'fixture',
+      kind: 'snapshot',
+      sequence: '1',
+      bids: [level('bid', '100', '2')],
+      asks: [level('ask', '101', '3')],
+      time: eventTimepoint({
+        eventTime: observed,
+        receivedAt: observed,
+        processedAt: observed,
+      }),
+    };
+    const deltaTime = SourceTimestamp.fromEpochMilliseconds('1700000000001');
+    const store = new MarketEventStore(db.client);
+    expect(await store.storeOrderBook(base)).toBe(true);
+    expect(
+      await store.storeOrderBook({
+        ...base,
+        kind: 'delta',
+        sequence: '2',
+        previousSequence: '1',
+        bids: [level('bid', '100', '1.5')],
+        asks: [],
+        time: eventTimepoint({
+          eventTime: deltaTime,
+          receivedAt: deltaTime,
+          processedAt: deltaTime,
+        }),
+      }),
+    ).toBe(true);
+    await expect(
+      store.reconstructOrderBook(
+        'TEST:BTCUSD',
+        new Date('2023-11-14T22:13:21Z'),
+      ),
+    ).resolves.toMatchObject({
+      valid: true,
+      sequence: '2',
+      bids: [{ price: '100', quantity: '1.5' }],
+      asks: [{ price: '101', quantity: '3' }],
     });
   });
 });
