@@ -33,7 +33,6 @@ Live execution is not the default next step after defining a strategy. Backtesti
 - `packages/execution`: execution contracts and adapters
 - `packages/shared`: common utilities and helpers
 - `prisma`: PostgreSQL schema and migrations
-- `docker`: container and local environment assets
 - `scripts`: maintenance and support scripts
 - `.github/workflows`: CI workflows
 
@@ -46,11 +45,25 @@ CCXT is the initial integration layer. Future venue support includes Coinbase, O
 
 ## Current status
 
-- Repository structure and foundational documentation are in place.
-- No applications have been initialized yet.
-- No dependencies have been installed yet.
+- Phase 1 platform skeleton is implemented.
+- API, worker, and dashboard applications are initialized.
+- PostgreSQL, Prisma migrations, shared configuration, structured logging, linting, and testing are configured.
 - No market data connectors, strategies, backtests, or execution flows are implemented yet.
-- This repository currently documents the target architecture and research lifecycle rather than an operating platform.
+
+## Local development
+
+Requirements: Node.js 20.19 or newer, Corepack, and an accessible PostgreSQL instance.
+
+```bash
+cp .env.example .env
+corepack pnpm install
+corepack pnpm db:deploy
+corepack pnpm dev
+```
+
+Set `DATABASE_URL` in `.env` to the local or remote PostgreSQL database before deploying migrations. Quant Lab does not provision or manage the database process.
+
+The API listens on `http://localhost:3000`, including `/health/live` and `/health/ready`. The dashboard listens on `http://localhost:3001`. Run the complete quality pipeline with `corepack pnpm check`.
 
 ## Documentation
 
@@ -58,7 +71,9 @@ CCXT is the initial integration layer. Future venue support includes Coinbase, O
 
 - [Vision](docs/vision.md)
 - [Roadmap](docs/roadmap.md)
+- [Sprint Plan](docs/sprint-plan.md)
 - [Project Principles](docs/project-principles.md)
+- [Definition of Done](docs/definition-of-done.md)
 
 ### Architecture
 
@@ -87,6 +102,7 @@ CCXT is the initial integration layer. Future venue support includes Coinbase, O
 - [Security](docs/security.md)
 - [Observability](docs/observability.md)
 - [Testing](docs/testing.md)
+- [Configuration](docs/configuration.md)
 - [Decisions](docs/decisions/README.md)
 - [Meetings](docs/meetings/README.md)
 

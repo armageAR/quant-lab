@@ -1,0 +1,8 @@
+.codebase-memory
+.next
+coverage
+dist
+node_modules
+pnpm-lock.yaml
+**/*.md
+**/next-env.d.ts

@@ -1,0 +1,131 @@
+:root {
+  --ink: #17211b;
+  --paper: #f2efe4;
+  --signal: #e8542f;
+  --grid: rgba(23, 33, 27, 0.12);
+  --font-sans: 'Avenir Next', 'Century Gothic', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 49.8%,
+      var(--grid) 50%,
+      transparent 50.2%
+    ),
+    repeating-linear-gradient(0deg, transparent 0 39px, var(--grid) 40px),
+    var(--paper);
+  font-family: var(--font-sans), sans-serif;
+}
+main {
+  min-height: 100vh;
+  padding: 28px clamp(24px, 6vw, 96px);
+  display: flex;
+  flex-direction: column;
+}
+header,
+footer {
+  display: flex;
+  justify-content: space-between;
+  font:
+    600 12px var(--font-mono),
+    monospace;
+  letter-spacing: 0.12em;
+}
+.phase,
+.badge {
+  color: var(--signal);
+}
+.hero {
+  padding: clamp(70px, 13vh, 150px) 0 64px;
+  max-width: 1050px;
+  animation: enter 0.7s ease-out both;
+}
+.kicker,
+.lede,
+article p {
+  color: #536158;
+}
+.kicker {
+  font:
+    400 14px var(--font-mono),
+    monospace;
+}
+h1 {
+  font-size: clamp(64px, 11vw, 158px);
+  line-height: 0.82;
+  letter-spacing: -0.075em;
+  margin: 26px 0 40px;
+  font-weight: 700;
+}
+.lede {
+  max-width: 650px;
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.55;
+}
+.status {
+  border-top: 2px solid var(--ink);
+  margin-top: auto;
+}
+article {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--ink);
+}
+.index,
+.badge {
+  font:
+    600 11px var(--font-mono),
+    monospace;
+  text-transform: uppercase;
+}
+article h2 {
+  margin: 0;
+  font-size: 18px;
+}
+article p {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+footer {
+  margin-top: 32px;
+}
+footer strong {
+  color: var(--signal);
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+@media (max-width: 600px) {
+  main {
+    padding: 20px;
+  }
+  .hero {
+    padding-top: 80px;
+  }
+  h1 {
+    font-size: 62px;
+  }
+  article {
+    grid-template-columns: 34px 1fr;
+  }
+  .badge {
+    grid-column: 2;
+  }
+  footer {
+    gap: 20px;
+  }
+}

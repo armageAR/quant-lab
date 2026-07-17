@@ -1,0 +1,18 @@
+# Local environment files may contain credentials.
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated output.
+node_modules/
+.turbo/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local logs and editor or OS metadata.
+*.log
+.DS_Store
+.idea/
+.vscode/

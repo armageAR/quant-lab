@@ -12,7 +12,7 @@ flowchart LR
     Storage[(PostgreSQL)]
     Detector[Opportunity Detection]
     Strategies[Strategy Engine]
-    Simulation[Simulation and Backtesting]
+    Backtesting[Simulation and Backtesting]
     Paper[Paper Trading]
     Execution[Controlled Live Execution]
     Analytics[Analytics and Risk]
@@ -24,14 +24,18 @@ flowchart LR
     Normalization --> Detector
     Storage --> Strategies
     Detector --> Strategies
-    Strategies --> Simulation
-    Simulation --> Analytics
-    Simulation --> Paper
+    Strategies --> Backtesting
+    Strategies --> Paper
+    Backtesting --> Analytics
     Paper --> Analytics
     Paper --> Execution
     Analytics --> Dashboard
     Execution --> Analytics
+
+    Backtesting -. validation gate .-> Paper
 ```
+
+Backtesting and paper trading are separate consumers of strategy definitions and use different execution models. The dashed edge is a governance gate: acceptable backtest and risk-validation evidence is required before paper trading is enabled, but backtest output is not a runtime data dependency of paper trading.
 
 ## Applications
 

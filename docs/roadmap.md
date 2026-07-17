@@ -1,5 +1,7 @@
 # Roadmap
 
+The delivery phases below define product scope. See the [Sprint Plan](./sprint-plan.md) for the ordered solo-development tasks, dependencies, and acceptance criteria within each phase.
+
 ## Phase 0: Repository foundation
 
 Scope:
@@ -25,7 +27,7 @@ Scope:
 - Next.js dashboard;
 - PostgreSQL;
 - Prisma;
-- Docker;
+- externally managed PostgreSQL development environment;
 - logging and configuration.
 
 Completion indicators:

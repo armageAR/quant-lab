@@ -7,7 +7,9 @@ The documentation is intentionally written in English so it can serve as stable 
 
 - [Vision](./vision.md): problem statement, goals, users, and product direction
 - [Roadmap](./roadmap.md): delivery phases and acceptance criteria
+- [Sprint Plan](./sprint-plan.md): executable solo-development plan and project review
 - [Project Principles](./project-principles.md): architecture, research, and execution guardrails
+- [Definition of Done](./definition-of-done.md): completion criteria for product and engineering work
 
 ## Architecture
 
@@ -42,6 +44,7 @@ The documentation is intentionally written in English so it can serve as stable 
 
 ## Operations
 
+- [Configuration](./configuration.md)
 - [Security](./security.md)
 - [Observability](./observability.md)
 - [Testing](./testing.md)
@@ -50,7 +53,10 @@ The documentation is intentionally written in English so it can serve as stable 
 
 - [Decisions](./decisions/README.md)
 - [ADR template](./decisions/ADR-000-template.md)
-- [ADR 001](./decisions/ADR-001-modular-monorepo.md)
+- [ADR 001: Modular monorepo](./decisions/ADR-001-modular-monorepo.md)
+- [ADR 002: Crypto-first, multi-market domain](./decisions/ADR-002-crypto-first-multi-market.md)
+- [ADR 003: Decimal and numeric precision](./decisions/ADR-003-decimal-numeric-precision.md)
+- [ADR 004: Time and clock model](./decisions/ADR-004-time-and-clock-model.md)
 - [Meetings](./meetings/README.md)
 - [Meeting template](./meetings/meeting-template.md)
 

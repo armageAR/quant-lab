@@ -27,7 +27,6 @@
 
 - pnpm
 - Turborepo
-- Docker
 - CCXT
 
 ## Planned infrastructure
