@@ -76,6 +76,8 @@ export interface AccountStatus {
   accountId?: string;
   enabled: boolean;
   permissions: CredentialPermissions;
+  permissionInspection: 'verified' | 'unavailable';
+  warnings: readonly string[];
   observedAt: SourceTimestamp;
 }
 

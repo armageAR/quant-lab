@@ -3,6 +3,7 @@
 coverage
 dist
 node_modules
+.omc/
 pnpm-lock.yaml
 **/*.md
 **/next-env.d.ts
