@@ -6,6 +6,10 @@ All notable changes are recorded here. Quant Lab follows a lightweight Keep a Ch
 
 ### Added
 
+- Exact decimal domain values and precision-safe quantization in `@quant-lab/core`.
+- UTC source timestamps preserving millisecond or microsecond precision and three-stage event timing.
+- Normalized market events, reusable fixtures, typed provider errors, and public/authenticated/historical read contracts in `@quant-lab/market-data`.
+
 - Phase 1 platform skeleton and readiness hardening.
 - Structured Nest/Pino logging, correlation context, Prometheus metrics, and worker operational health.
 - Shared database lifecycle and PostgreSQL-backed CI/integration tests.
