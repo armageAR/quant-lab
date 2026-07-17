@@ -136,6 +136,8 @@ Acceptance:
 
 ### Sprint 2.1: Exact domain primitives and provider contracts
 
+**Status:** complete on branch `agent/sprint-2-1-domain-contracts`; completion requires the supported quality gate and review evidence in the pull request.
+
 **Goal:** create infrastructure-independent contracts before connecting exchanges.
 
 Tasks:
