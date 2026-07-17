@@ -29,6 +29,7 @@ Use a TypeScript Turborepo monorepo with separate applications and shared packag
 - `packages/execution`
 - `packages/shared`
 - `packages/database`
+- `packages/exchange-adapters`
 
 ## Alternatives considered
 

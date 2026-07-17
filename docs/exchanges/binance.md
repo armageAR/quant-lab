@@ -14,8 +14,7 @@ CCXT should provide:
 
 - market discovery;
 - normalized symbols where possible;
-- order placement and cancellation primitives;
-- account and balance access;
+- read-only account, permission, balance, and effective-fee access;
 - common metadata and precision helpers.
 
 Any Binance-specific edge cases should still be handled in the adapter layer rather than spread into strategy code.
@@ -27,7 +26,11 @@ Any Binance-specific edge cases should still be handled in the adapter layer rat
 - fetch order books;
 - fetch trades;
 - fetch candles;
-- retrieve balances and open orders where supported.
+- inspect API-key restrictions and retrieve balances without modifying account state.
+
+## Phase 2 safety
+
+The adapter calls Binance API-key restrictions before authenticated account reads. Keys with spot/margin/futures trading or withdrawal permission are rejected. Binance Spot testnet is selected only when `BINANCE_SANDBOX=true`, before any other CCXT call.
 
 ## WebSocket use cases
 

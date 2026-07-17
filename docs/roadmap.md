@@ -41,7 +41,7 @@ Completion indicators:
 
 ## Phase 2: Market data foundation
 
-Status: in progress. Sprint 2.1 domain primitives and provider contracts are implemented; concrete venue connectivity begins in Sprint 2.2.
+Status: in progress. Sprint 2.1 is complete; Sprint 2.2 read-only adapters are implemented and await credential-backed acceptance evidence.
 
 Scope:
 - `MarketDataProvider`;
