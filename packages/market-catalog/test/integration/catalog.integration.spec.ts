@@ -114,6 +114,9 @@ describe('MarketCatalog integration', () => {
         spot: true,
       },
     ];
+    await database.client.datasetEvent.deleteMany();
+    await database.client.datasetMarket.deleteMany();
+    await database.client.datasetManifest.deleteMany();
     await database.client.marketTicker.deleteMany();
     await database.client.marketTrade.deleteMany();
     await database.client.marketCandle.deleteMany();

@@ -9,12 +9,15 @@ import type { OrderBook, Ticker } from '@quant-lab/market-data';
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { MarketEventStore } from '../../src';
+import { MarketEventStore, PostgreSqlHistoricalDataProvider } from '../../src';
 config({ path: resolve(process.cwd(), '../../.env'), quiet: true });
 const db = new DatabaseLifecycle();
 describe('MarketEventStore integration', () => {
   beforeAll(async () => {
     await db.connect();
+    await db.client.datasetEvent.deleteMany();
+    await db.client.datasetMarket.deleteMany();
+    await db.client.datasetManifest.deleteMany();
     await db.client.orderBookInvalidation.deleteMany();
     await db.client.marketOrderBookEvent.deleteMany();
     await db.client.marketTicker.deleteMany();
@@ -138,5 +141,12 @@ describe('MarketEventStore integration', () => {
       bids: [{ price: '100', quantity: '1.5' }],
       asks: [{ price: '101', quantity: '3' }],
     });
+    const historical = new PostgreSqlHistoricalDataProvider(db.client);
+    const ordered = await historical.queryOrderBooks({
+      marketId: 'TEST:BTCUSD',
+      from: SourceTimestamp.fromEpochMilliseconds('1699999999999'),
+      to: SourceTimestamp.fromEpochMilliseconds('1700000000002'),
+    });
+    expect(ordered.map((event) => event.sequence)).toEqual(['1', '2']);
   });
 });

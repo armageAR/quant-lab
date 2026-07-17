@@ -77,9 +77,56 @@ model Market {
   candles      MarketCandle[]
   orderBooks   MarketOrderBookEvent[]
   bookInvalidations OrderBookInvalidation[]
+  datasetMarkets DatasetMarket[]
 
   @@unique([venueId, venueSymbol])
   @@index([instrumentId, status, spot])
+}
+
+model DatasetManifest {
+  id            String         @id
+  checksum      String         @unique
+  schemaVersion String
+  from          DateTime       @db.Timestamptz(6)
+  to            DateTime       @db.Timestamptz(6)
+  eventCount    Int
+  sourceCoverage Json
+  qualityReport Json?
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
+  validatedAt   DateTime?      @db.Timestamptz(6)
+  pinnedAt      DateTime?      @db.Timestamptz(6)
+  exportedAt    DateTime?      @db.Timestamptz(6)
+  exportPath    String?
+  compactedAt   DateTime?      @db.Timestamptz(6)
+  markets       DatasetMarket[]
+  events        DatasetEvent[]
+
+  @@index([createdAt])
+  @@index([pinnedAt])
+}
+
+model DatasetMarket {
+  manifestId String
+  marketId   String
+  manifest   DatasetManifest @relation(fields: [manifestId], references: [id])
+  market     Market          @relation(fields: [marketId], references: [id])
+
+  @@id([manifestId, marketId])
+  @@index([marketId])
+}
+
+model DatasetEvent {
+  manifestId String
+  ordinal    Int
+  eventType  String
+  sourceId   String
+  occurredAt DateTime @db.Timestamptz(6)
+  checksum   String
+  manifest   DatasetManifest @relation(fields: [manifestId], references: [id])
+
+  @@id([manifestId, ordinal])
+  @@unique([manifestId, eventType, sourceId])
+  @@index([eventType, sourceId])
 }
 
 model MarketOrderBookEvent {
