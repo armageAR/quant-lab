@@ -13,7 +13,7 @@
   "dependencies": {
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
-    "@prisma/client": "^6.19.1",
+    "@quant-lab/database": "workspace:*",
     "@quant-lab/shared": "workspace:*",
     "dotenv": "^17.2.3",
     "pino": "^10.1.0",

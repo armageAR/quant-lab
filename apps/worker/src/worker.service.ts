@@ -4,23 +4,25 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import type { ApplicationMetrics } from '@quant-lab/shared';
 import type { Logger } from 'pino';
 
-import { WORKER_LOGGER } from './tokens';
+import { METRICS, WORKER_LOGGER } from './tokens';
 
 @Injectable()
 export class WorkerService implements OnModuleInit, OnModuleDestroy {
-  private readonly prisma = new PrismaClient();
+  constructor(
+    @Inject(WORKER_LOGGER) private readonly logger: Logger,
+    @Inject(METRICS) private readonly metrics: ApplicationMetrics,
+  ) {}
 
-  constructor(@Inject(WORKER_LOGGER) private readonly logger: Logger) {}
-
-  async onModuleInit(): Promise<void> {
-    await this.prisma.$connect();
-    this.logger.info('Worker connected to PostgreSQL');
+  onModuleInit(): void {
+    this.metrics.workerReady.set(1);
+    this.logger.info('Worker ready');
   }
 
-  async onModuleDestroy(): Promise<void> {
-    await this.prisma.$disconnect();
+  onModuleDestroy(): void {
+    this.metrics.workerReady.set(0);
+    this.logger.info('Worker stopped accepting operations');
   }
 }

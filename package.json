@@ -11,6 +11,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "test": "turbo test",
+    "test:integration": "pnpm --filter @quant-lab/database test:integration",
+    "test:process": "node scripts/check-process-lifecycle.mjs",
     "typecheck": "turbo typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -18,7 +20,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "docs:check": "node scripts/check-markdown-links.mjs",
+    "check": "pnpm format:check && pnpm docs:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "check:ci": "pnpm db:deploy && pnpm check && pnpm test:integration && pnpm test:process && prisma migrate status"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

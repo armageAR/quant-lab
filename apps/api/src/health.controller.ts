@@ -1,7 +1,13 @@
-import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
-import type { Prisma } from '@prisma/client';
+import {
+  Controller,
+  Get,
+  Inject,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import type { DatabaseLifecycle } from '@quant-lab/database';
+import type { ApplicationMetrics } from '@quant-lab/shared';
 
-import { PrismaService } from './prisma.service';
+import { DATABASE, METRICS } from './tokens';
 
 interface HealthResponse {
   status: 'ok';
@@ -10,7 +16,10 @@ interface HealthResponse {
 
 @Controller('health')
 export class HealthController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(DATABASE) private readonly database: DatabaseLifecycle,
+    @Inject(METRICS) private readonly metrics: ApplicationMetrics,
+  ) {}
 
   @Get('live')
   live(): HealthResponse {
@@ -19,11 +28,12 @@ export class HealthController {
 
   @Get('ready')
   async ready(): Promise<HealthResponse> {
-    try {
-      await this.prisma.$queryRaw<Prisma.JsonObject[]>`SELECT 1`;
+    if (await this.database.probe()) {
+      this.metrics.databaseReady.set(1);
       return { status: 'ok', time: new Date().toISOString() };
-    } catch {
-      throw new ServiceUnavailableException('Database is unavailable');
     }
+
+    this.metrics.databaseReady.set(0);
+    throw new ServiceUnavailableException('Database is unavailable');
   }
 }
