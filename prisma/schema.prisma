@@ -75,9 +75,47 @@ model Market {
   tickers      MarketTicker[]
   trades       MarketTrade[]
   candles      MarketCandle[]
+  orderBooks   MarketOrderBookEvent[]
+  bookInvalidations OrderBookInvalidation[]
 
   @@unique([venueId, venueSymbol])
   @@index([instrumentId, status, spot])
+}
+
+model MarketOrderBookEvent {
+  id               String   @id @default(uuid()) @db.Uuid
+  idempotencyKey   String   @unique
+  marketId         String
+  venueId          String
+  kind             String
+  sequence         String
+  previousSequence String?
+  eventTime        DateTime? @db.Timestamptz(6)
+  receivedAt       DateTime  @db.Timestamptz(6)
+  processedAt      DateTime  @db.Timestamptz(6)
+  bids             Json
+  asks             Json
+  checksum         String?
+  depth            Int
+  rawEnvelopeId    String   @db.Uuid
+  market           Market   @relation(fields: [marketId], references: [id])
+
+  @@unique([marketId, sequence, kind])
+  @@index([marketId, eventTime, id])
+  @@index([marketId, kind, processedAt])
+}
+
+model OrderBookInvalidation {
+  id         String   @id @default(uuid()) @db.Uuid
+  marketId   String
+  venueId    String
+  sequence   String?
+  reason     String
+  details    Json?
+  detectedAt DateTime @db.Timestamptz(6)
+  market     Market   @relation(fields: [marketId], references: [id])
+
+  @@index([marketId, detectedAt])
 }
 
 model RawMarketEnvelope {

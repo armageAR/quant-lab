@@ -23,6 +23,7 @@ describe('MarketsController', () => {
       trades: vi.fn().mockResolvedValue([]),
       tickers: vi.fn(),
       candles: vi.fn(),
+      reconstructOrderBook: vi.fn().mockResolvedValue({ valid: true }),
     };
     const controller = new MarketsController(
       { listComparableActiveMarkets: vi.fn() } as unknown as MarketCatalog,
@@ -37,5 +38,11 @@ describe('MarketsController', () => {
     expect(() => controller.candles('BINANCE:BTCUSDT')).toThrow(
       'interval is required',
     );
+    await expect(
+      controller.orderBook('BINANCE:BTCUSDT', undefined, '25'),
+    ).resolves.toEqual({ valid: true });
+    expect(() =>
+      controller.orderBook('BINANCE:BTCUSDT', undefined, '1001'),
+    ).toThrow('depth must be between');
   });
 });

@@ -1,13 +1,21 @@
-import type { SourceTimestamp } from '@quant-lab/core';
+import {
+  eventTimepoint,
+  Price,
+  Quantity,
+  SourceTimestamp,
+} from '@quant-lab/core';
 import type { DatabaseClient } from '@quant-lab/database';
 import type {
   Candle,
   ClockDriftSample,
+  OrderBook,
   Ticker,
   Trade,
 } from '@quant-lab/market-data';
 import type { ApplicationMetrics } from '@quant-lab/shared';
 import { createHash } from 'node:crypto';
+
+import { OrderBookEngine, type ReconstructedBook } from './order-book';
 
 function date(value: SourceTimestamp): Date {
   return new Date(Number(value.epochMicroseconds / 1_000n));
@@ -238,6 +246,153 @@ export class MarketEventStore {
     return inserted;
   }
 
+  async storeOrderBook(event: OrderBook): Promise<boolean> {
+    const idempotencyKey = key(
+      'order-book',
+      `${event.marketId}:${event.kind}:${event.sequence}`,
+    );
+    return this.database.$transaction(async (tx) => {
+      if (
+        await tx.marketOrderBookEvent.findUnique({ where: { idempotencyKey } })
+      ) {
+        this.metrics?.ingestionDuplicates.inc({
+          venue: event.venueId,
+          type: 'order_book',
+        });
+        return false;
+      }
+      const levels = (items: typeof event.bids) =>
+        items.map((level) => ({
+          price: level.price.toString(),
+          quantity: level.quantity.toString(),
+        }));
+      const payload = {
+        kind: event.kind,
+        sequence: event.sequence,
+        previousSequence: event.previousSequence,
+        bids: levels(event.bids),
+        asks: levels(event.asks),
+        checksum: event.checksum,
+      };
+      const raw = await tx.rawMarketEnvelope.create({
+        data: {
+          idempotencyKey,
+          venueId: event.venueId,
+          marketId: event.marketId,
+          eventType: `order_book_${event.kind}`,
+          ...times(event),
+          sourcePrecision:
+            event.time.eventTime?.precision ?? event.time.receivedAt.precision,
+          payload: event.sourcePayload ?? payload,
+          checksum: key(
+            'payload',
+            JSON.stringify(event.sourcePayload ?? payload),
+          ),
+        },
+      });
+      await tx.marketOrderBookEvent.create({
+        data: {
+          idempotencyKey,
+          marketId: event.marketId,
+          venueId: event.venueId,
+          kind: event.kind,
+          sequence: event.sequence,
+          previousSequence: event.previousSequence,
+          ...times(event),
+          bids: levels(event.bids),
+          asks: levels(event.asks),
+          checksum: event.checksum,
+          depth: Math.max(event.bids.length, event.asks.length),
+          rawEnvelopeId: raw.id,
+        },
+      });
+      this.metrics?.ingestedEvents.inc({
+        venue: event.venueId,
+        type: 'order_book',
+      });
+      return true;
+    });
+  }
+
+  async recordBookInvalidation(
+    marketId: string,
+    venueId: string,
+    reason: string,
+    sequence?: string,
+    details?: Record<string, string>,
+  ): Promise<void> {
+    await this.database.orderBookInvalidation.create({
+      data: {
+        marketId,
+        venueId,
+        reason,
+        sequence,
+        details,
+        detectedAt: new Date(),
+      },
+    });
+  }
+
+  async reconstructOrderBook(
+    marketId: string,
+    at = new Date(),
+    depth = 100,
+  ): Promise<ReconstructedBook | undefined> {
+    const snapshot = await this.database.marketOrderBookEvent.findFirst({
+      where: { marketId, kind: 'snapshot', processedAt: { lte: at } },
+      orderBy: [{ processedAt: 'desc' }, { id: 'desc' }],
+    });
+    if (!snapshot) return undefined;
+    const deltas = await this.database.marketOrderBookEvent.findMany({
+      where: {
+        marketId,
+        kind: 'delta',
+        processedAt: { gte: snapshot.processedAt, lte: at },
+      },
+      orderBy: [{ processedAt: 'asc' }, { id: 'asc' }],
+      take: 10_000,
+    });
+    deltas.sort((left, right) => {
+      if (/^\d+$/.test(left.sequence) && /^\d+$/.test(right.sequence)) {
+        const difference = BigInt(left.sequence) - BigInt(right.sequence);
+        return difference < 0n ? -1 : difference > 0n ? 1 : 0;
+      }
+      return left.processedAt.getTime() - right.processedAt.getTime();
+    });
+    const engine = new OrderBookEngine({
+      depth,
+      staleAfterMs: Number.MAX_SAFE_INTEGER,
+    });
+    let result: ReconstructedBook | undefined;
+    for (const row of [snapshot, ...deltas]) {
+      const timestamp = SourceTimestamp.fromEpochMicroseconds(
+        BigInt(row.processedAt.getTime()) * 1_000n,
+      );
+      const level = (side: 'bid' | 'ask', value: unknown) =>
+        (value as Array<{ price: string; quantity: string }>).map((item) => ({
+          side,
+          price: Price.from(item.price, marketId),
+          quantity: Quantity.from(item.quantity, marketId),
+        }));
+      result = engine.apply({
+        venueId: row.venueId,
+        marketId: row.marketId,
+        source: 'persistence',
+        kind: row.kind as 'snapshot' | 'delta',
+        sequence: row.sequence,
+        ...(row.previousSequence
+          ? { previousSequence: row.previousSequence }
+          : {}),
+        ...(row.checksum ? { checksum: row.checksum } : {}),
+        bids: level('bid', row.bids),
+        asks: level('ask', row.asks),
+        time: eventTimepoint({ receivedAt: timestamp, processedAt: timestamp }),
+      });
+      if (!result.valid) break;
+    }
+    return result;
+  }
+
   async trades(
     marketId: string,
     limit = 100,
@@ -416,6 +571,8 @@ export class MarketEventStore {
     tickers: number;
     trades: number;
     candles: number;
+    orderBooks: number;
+    bookInvalidations: number;
     envelopes: number;
   }> {
     return this.database.$transaction(async (tx) => {
@@ -434,12 +591,29 @@ export class MarketEventStore {
           where: { receivedAt: { lt: cutoff } },
         })
       ).count;
+      const orderBooks = (
+        await tx.marketOrderBookEvent.deleteMany({
+          where: { receivedAt: { lt: cutoff } },
+        })
+      ).count;
+      const bookInvalidations = (
+        await tx.orderBookInvalidation.deleteMany({
+          where: { detectedAt: { lt: cutoff } },
+        })
+      ).count;
       const envelopes = (
         await tx.rawMarketEnvelope.deleteMany({
           where: { receivedAt: { lt: cutoff } },
         })
       ).count;
-      return { tickers, trades, candles, envelopes };
+      return {
+        tickers,
+        trades,
+        candles,
+        orderBooks,
+        bookInvalidations,
+        envelopes,
+      };
     });
   }
 }

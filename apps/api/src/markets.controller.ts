@@ -99,6 +99,22 @@ export class MarketsController {
     );
   }
 
+  @Get('order-book')
+  orderBook(
+    @Query('marketId') marketId?: string,
+    @Query('at') at?: string,
+    @Query('depth') depth?: string,
+  ) {
+    const parsedDepth = depth === undefined ? 100 : Number(depth);
+    if (!Number.isInteger(parsedDepth) || parsedDepth < 1 || parsedDepth > 1000)
+      throw new BadRequestException('depth must be between 1 and 1000');
+    return this.events.reconstructOrderBook(
+      this.requiredMarket(marketId),
+      this.date(at, 'at') ?? new Date(),
+      parsedDepth,
+    );
+  }
+
   private requiredMarket(value?: string): string {
     if (!value) throw new BadRequestException('marketId is required');
     return value;

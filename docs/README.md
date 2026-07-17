@@ -44,6 +44,7 @@ The documentation is intentionally written in English so it can serve as stable 
 
 - [API notes](./api/README.md)
 - [Database notes](./database/README.md)
+- [Order-book reconstruction](./order-books.md)
 
 ## Operations
 

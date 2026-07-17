@@ -223,6 +223,8 @@ Acceptance:
 
 ### Sprint 2.5: Order-book reconstruction
 
+**Status:** complete on branch `agent/sprint-2-5-order-book-reconstruction`. Normalized snapshot/delta persistence, deterministic reconstruction, invalidation rules, bounded depth queries, and regression coverage are implemented.
+
 **Goal:** preserve the depth needed to determine executable arbitrage.
 
 Tasks:

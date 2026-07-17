@@ -28,7 +28,8 @@ async function ingest(): Promise<void> {
     );
     let tickers = 0,
       trades = 0,
-      candles = 0;
+      candles = 0,
+      orderBooks = 0;
     for (const provider of providers) {
       await store.storeClockDrift(await provider.getClockDrift());
       const markets = await database.client.market.findMany({
@@ -48,9 +49,17 @@ async function ingest(): Promise<void> {
             60,
           ),
         );
+        if (
+          await store.storeOrderBook(
+            await provider.fetchOrderBook(market.id, 100),
+          )
+        )
+          orderBooks++;
       }
     }
-    process.stdout.write(`${JSON.stringify({ tickers, trades, candles })}\n`);
+    process.stdout.write(
+      `${JSON.stringify({ tickers, trades, candles, orderBooks })}\n`,
+    );
   } finally {
     await Promise.all(providers.map((provider) => provider.close()));
     await database.disconnect();
