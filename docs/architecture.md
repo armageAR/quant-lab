@@ -53,6 +53,7 @@ Backtesting and paper trading are separate consumers of strategy definitions and
 - `packages/execution`: `ExecutionProvider` abstractions and live or simulated routing adapters.
 - `packages/shared`: reusable utilities, types, validation helpers, and cross-cutting primitives.
 - `packages/database`: Prisma client lifecycle, database health probes, and persistence test utilities.
+- `packages/exchange-adapters`: read-only CCXT infrastructure for authenticated venue connectivity and normalization.
 
 ## Dependency boundaries
 

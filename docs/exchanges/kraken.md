@@ -14,8 +14,7 @@ CCXT should provide the same broad contract used for Binance:
 
 - market metadata;
 - symbol and precision information;
-- order placement and cancellation;
-- balances and open orders;
+- read-only account, permission, balance, and effective-fee access;
 - common response normalization.
 
 ## REST use cases
@@ -26,7 +25,11 @@ CCXT should provide the same broad contract used for Binance:
 - trades;
 - order books;
 - balances;
-- order status and open-order queries where supported.
+- API-key permission inspection and balances.
+
+## Phase 2 safety
+
+The adapter calls Kraken `GetApiKeyInfo` before authenticated account reads and rejects trading, cancellation, deposits, Earn, withdrawals, or withdrawal-address permissions. Kraken Spot has no CCXT sandbox endpoint; `KRAKEN_SANDBOX=true` is rejected instead of silently connecting to production.
 
 ## WebSocket use cases
 

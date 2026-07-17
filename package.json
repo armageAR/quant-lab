@@ -13,6 +13,8 @@
     "test": "turbo test",
     "test:integration": "pnpm --filter @quant-lab/database test:integration",
     "test:process": "node scripts/check-process-lifecycle.mjs",
+    "test:exchange": "pnpm --filter @quant-lab/exchange-adapters test:integration",
+    "exchange:check": "pnpm --filter @quant-lab/exchange-adapters build && pnpm --filter @quant-lab/exchange-adapters connectivity",
     "typecheck": "turbo typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -69,6 +69,7 @@ export interface CredentialPermissions {
   read: boolean;
   trade: boolean;
   withdraw: boolean;
+  accountMutation: boolean;
   observedAt: SourceTimestamp;
 }
 
@@ -76,6 +77,8 @@ export interface AccountStatus {
   accountId?: string;
   enabled: boolean;
   permissions: CredentialPermissions;
+  permissionInspection: 'verified' | 'unavailable';
+  warnings: readonly string[];
   observedAt: SourceTimestamp;
 }
 

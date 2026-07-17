@@ -41,7 +41,7 @@ Completion indicators:
 
 ## Phase 2: Market data foundation
 
-Status: in progress. Sprint 2.1 domain primitives and provider contracts are implemented; concrete venue connectivity begins in Sprint 2.2.
+Status: in progress. Sprints 2.1 and 2.2 are complete, including local credential-backed read-only acceptance for Binance and Kraken.
 
 Scope:
 - `MarketDataProvider`;

@@ -25,8 +25,9 @@ Environment files are input mechanisms, not the configuration API. Each applicat
 | Runtime   | `NODE_ENV`, `PORT`, `WORKER_HEALTH_PORT`                   | Service names are app-owned; operational ports are app-specific.                     |
 | Database  | `DATABASE_URL`                                             | Required for applications that persist data. Never log it.                          |
 | Logging   | `LOG_LEVEL`, `LOG_FORMAT`                                  | Validate against explicit enums.                                                    |
-| Binance   | `BINANCE_API_KEY`, `BINANCE_API_SECRET`, `BINANCE_SANDBOX` | Credentials are required only for authenticated capabilities.                       |
-| Kraken    | `KRAKEN_API_KEY`, `KRAKEN_API_SECRET`, `KRAKEN_SANDBOX`    | Credentials are required only for authenticated capabilities.                       |
+| Exchanges | `EXCHANGE_CONNECTIVITY_ENABLED`, `EXCHANGE_MARKETS`, `EXCHANGE_TIMEOUT_MS`, `EXCHANGE_RETRY_ATTEMPTS`, `EXCHANGE_CIRCUIT_FAILURES`, `EXCHANGE_CIRCUIT_RESET_MS` | Authenticated diagnostics require explicit enablement and bounded resilience settings. |
+| Binance   | `BINANCE_API_KEY`, `BINANCE_API_SECRET`, `BINANCE_SANDBOX`, `BINANCE_INTEGRATION_ENABLED` | Credentials are paired; integration tests are explicit opt-in. |
+| Kraken    | `KRAKEN_API_KEY`, `KRAKEN_API_SECRET`, `KRAKEN_SANDBOX`, `KRAKEN_INTEGRATION_ENABLED` | Kraken Spot has no sandbox in CCXT, so `KRAKEN_SANDBOX` must remain `false`. |
 | Execution | `LIVE_EXECUTION_ENABLED`                                   | Must default to `false`; enabling it is necessary but not sufficient to trade live. |
 | Features  | `FEATURE_<NAME>_ENABLED`                                   | Flags are boolean, documented, owned, and removable.                                |
 
@@ -48,6 +49,18 @@ Provider-specific URLs, account IDs, or subaccount names should use the provider
 Feature flags control incomplete or operationally risky capabilities; they do not replace authorization, risk limits, or kill switches. Every flag needs an owner, purpose, safe fallback, and removal condition. Unknown flags are rejected rather than silently enabled.
 
 `LIVE_EXECUTION_ENABLED=false` is the mandatory default in source, examples, development, and tests. Production live execution additionally requires valid restricted credentials, explicit operator authorization, risk configuration, and the execution safeguards described in the security documentation.
+
+## Authenticated connectivity
+
+Create separate API keys with balance/account-read permission only. Trading, order cancellation, transfers, deposits, and withdrawals must be disabled. Run the safe diagnostic from the repository root:
+
+```bash
+pnpm exchange:check
+```
+
+The command requires `EXCHANGE_CONNECTIVITY_ENABLED=true`, both venue credential pairs, and appropriate sandbox selection. It inspects permissions before reading balances and exits non-zero when dangerous permissions are detected. Its output contains counts, capabilities, clock drift, and request latency, never balance amounts or credentials.
+
+Set `BINANCE_INTEGRATION_ENABLED=true` or `KRAKEN_INTEGRATION_ENABLED=true` only to opt that venue into `pnpm test:exchange`. These tests are skipped in CI because personal credentials are never CI inputs.
 
 ## Unsafe defaults
 
