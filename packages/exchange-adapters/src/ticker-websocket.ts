@@ -142,9 +142,10 @@ export class NativeTickerWebSocket implements TickerWebSocketSubscription {
     if (
       this.#lastMessage !== undefined &&
       wall - this.#lastMessage > (this.options.gapMs ?? 5000)
-    )
+    ) {
       this.stats.gaps++;
-    this.options.onGap?.();
+      this.options.onGap?.();
+    }
     this.#lastMessage = wall;
     const root = record(JSON.parse(raw));
     const binance = this.options.venue.code === 'BINANCE';

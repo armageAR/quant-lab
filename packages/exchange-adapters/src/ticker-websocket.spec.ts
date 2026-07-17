@@ -1,6 +1,6 @@
-import type { Market, Venue } from '@quant-lab/core';
+import { SourceTimestamp, type Market, type Venue } from '@quant-lab/core';
 import { WebSocketServer } from 'ws';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { NativeTickerWebSocket } from './ticker-websocket';
 
 describe('NativeTickerWebSocket', () => {
@@ -33,6 +33,7 @@ describe('NativeTickerWebSocket', () => {
       spot: true,
     };
     const received: unknown[] = [];
+    const onGap = vi.fn();
     server.once('connection', (socket) =>
       socket.send(
         JSON.stringify({
@@ -47,11 +48,13 @@ describe('NativeTickerWebSocket', () => {
       onTicker: (ticker) => {
         received.push(ticker);
       },
+      onGap,
     });
     await new Promise((resolve) => setTimeout(resolve, 300));
     await subscription[Symbol.asyncDispose]();
     expect(received).toHaveLength(1);
     expect(subscription.stats.messages).toBe(1);
+    expect(onGap).not.toHaveBeenCalled();
   });
   it('reconnects after a disconnected socket', async () => {
     server = new WebSocketServer({ port: 0 });
@@ -133,5 +136,50 @@ describe('NativeTickerWebSocket', () => {
     await new Promise((resolve) => setTimeout(resolve, 100));
     await subscription[Symbol.asyncDispose]();
     expect(subscription.stats.rejected).toBeGreaterThan(0);
+  });
+  it('reports a gap only when the configured interval is exceeded', async () => {
+    server = new WebSocketServer({ port: 0 });
+    await new Promise<void>((resolve) => server!.once('listening', resolve));
+    const address = server.address();
+    if (!address || typeof address === 'string')
+      throw new Error('unexpected address');
+    const venue: Venue = {
+      id: 'BINANCE',
+      code: 'BINANCE',
+      name: 'Binance',
+      kind: 'exchange',
+      status: 'active',
+    };
+    const market: Market = {
+      id: 'BINANCE:BTCUSDT',
+      venueId: 'BINANCE',
+      instrumentId: 'BTC-USDT',
+      venueSymbol: 'BTC/USDT',
+      status: 'active',
+      spot: true,
+    };
+    const onGap = vi.fn();
+    let clock = 0;
+    server.once('connection', (socket) => {
+      socket.send(
+        JSON.stringify({ data: { s: 'BTCUSDT', b: '100', a: '101' } }),
+      );
+      socket.send(
+        JSON.stringify({ data: { s: 'BTCUSDT', b: '100', a: '101' } }),
+      );
+    });
+    const subscription = new NativeTickerWebSocket({
+      venue,
+      markets: [market],
+      url: `ws://127.0.0.1:${address.port}`,
+      gapMs: 5000,
+      now: () => SourceTimestamp.fromEpochMilliseconds(String((clock += 6001))),
+      onGap,
+      onTicker: () => undefined,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    await subscription[Symbol.asyncDispose]();
+    expect(subscription.stats.gaps).toBe(1);
+    expect(onGap).toHaveBeenCalledTimes(1);
   });
 });
