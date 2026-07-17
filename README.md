@@ -63,7 +63,7 @@ corepack pnpm dev
 
 Set `DATABASE_URL` in `.env` to the local or remote PostgreSQL database before deploying migrations. Quant Lab does not provision or manage the database process.
 
-The API listens on `http://localhost:3000`, including `/health/live` and `/health/ready`. The dashboard listens on `http://localhost:3001`. Run the complete quality pipeline with `corepack pnpm check`.
+The API listens on `http://localhost:3000`, including `/health/live`, `/health/ready`, and `/metrics`. The dashboard listens on `http://localhost:3001`. Worker health and metrics listen on `http://localhost:3002` by default. Run the PostgreSQL-independent quality pipeline with `corepack pnpm check`, or the complete database-backed gate with `corepack pnpm check:ci` against a dedicated test database.
 
 ## Documentation
 
@@ -72,8 +72,11 @@ The API listens on `http://localhost:3000`, including `/health/live` and `/healt
 - [Vision](docs/vision.md)
 - [Roadmap](docs/roadmap.md)
 - [Sprint Plan](docs/sprint-plan.md)
+- [Phase 2 Readiness Plan](docs/phase-2-readiness-plan.md)
+- [Phase 1 Completion](docs/phase-1-completion.md)
 - [Project Principles](docs/project-principles.md)
 - [Definition of Done](docs/definition-of-done.md)
+- [Development Workflow](docs/development.md)
 
 ### Architecture
 

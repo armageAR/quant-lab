@@ -1,3 +1,2 @@
 export const DATABASE = Symbol('DATABASE');
 export const METRICS = Symbol('METRICS');
-export const WORKER_LOGGER = Symbol('WORKER_LOGGER');

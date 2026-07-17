@@ -18,6 +18,8 @@ The initial product scope is authenticated Binance and Kraken spot-market resear
 
 ### Gaps to close before Phase 2
 
+The current status and remediation sequence for these gaps is maintained in the [Phase 2 Readiness Plan](./phase-2-readiness-plan.md).
+
 - The current implementation has not been committed as a stable Phase 1 baseline.
 - Nest framework logs are not consistently routed through the structured logger.
 - Request and job correlation IDs, metrics, and integration tests are missing.
@@ -582,4 +584,3 @@ Execute next:
 4. Sprint 2.1: Exact domain primitives and provider contracts.
 
 Do not purchase, transfer, or allocate exchange capital for execution during these sprints. Phase 2 authenticated connectivity needs read-only API keys only.
-

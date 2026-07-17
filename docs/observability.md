@@ -9,6 +9,8 @@
 
 ## Metrics
 
+API metrics are exposed at `/metrics` on the API port. Worker metrics and health use the local operational port configured by `WORKER_HEALTH_PORT` (default `3002`). Metric labels must remain bounded; correlation IDs, market symbols, raw paths, and error messages are not metric labels.
+
 Track metrics for:
 
 - ingestion lag;
@@ -36,6 +38,8 @@ Track metrics for:
 - historical dataset availability;
 - database availability;
 - queue availability when Redis and BullMQ are added.
+
+Liveness indicates that the process event loop and operational server respond. Readiness additionally probes PostgreSQL. A database failure must make readiness fail without changing liveness.
 
 ## Alerts and dashboards
 

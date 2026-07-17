@@ -19,6 +19,8 @@ Completion indicators:
 
 ## Phase 1: Platform skeleton
 
+Status: complete. See [Phase 1 Completion Evidence](./phase-1-completion.md).
+
 Scope:
 - pnpm workspace;
 - Turborepo;
