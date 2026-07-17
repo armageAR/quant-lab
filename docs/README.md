@@ -1,17 +1,59 @@
 # Documentation
 
-This folder contains the working design documents for Quant Lab.
+This directory contains the working design and governance documents for Quant Lab.
+The documentation is intentionally written in English so it can serve as stable shared context for implementation work.
 
-## Contents
+## Product
 
-- `vision.md`: product direction and outcomes
-- `architecture.md`: system boundaries and module responsibilities
-- `roadmap.md`: phased delivery plan
-- `tech-stack.md`: core tools and runtime choices
-- `project-principles.md`: development rules and decision guardrails
-- `glossary.md`: domain and platform vocabulary
-- `ai-context.md`: implementation context for agentic work
-- `decisions/`: architecture and product decisions
-- `meetings/`: meeting notes and action items
-- `api/`, `database/`, `exchanges/`, `strategies/`: focused technical notes
+- [Vision](./vision.md): problem statement, goals, users, and product direction
+- [Roadmap](./roadmap.md): delivery phases and acceptance criteria
+- [Project Principles](./project-principles.md): architecture, research, and execution guardrails
 
+## Architecture
+
+- [Architecture](./architecture.md): system boundaries, flows, and runtime responsibilities
+- [Tech Stack](./tech-stack.md): current and planned technical stack
+- [Providers](./providers.md): conceptual provider interfaces
+- [Domain Model](./domain-model.md): core entities and relationships
+
+## Domain
+
+- [Glossary](./glossary.md): canonical terminology
+- [Strategies](./strategies/README.md): strategy documentation entry point
+- [Experiments](./experiments/README.md): experiment tracking entry point
+
+## Research
+
+- [Strategy template](./strategies/strategy-template.md)
+- [Cross-exchange arbitrage](./strategies/cross-exchange-arbitrage.md)
+- [Experiment template](./experiments/experiment-template.md)
+
+## Exchanges and providers
+
+- [Exchange notes](./exchanges/README.md)
+- [Binance](./exchanges/binance.md)
+- [Kraken](./exchanges/kraken.md)
+- [IBKR](./exchanges/ibkr.md)
+
+## Data and API
+
+- [API notes](./api/README.md)
+- [Database notes](./database/README.md)
+
+## Operations
+
+- [Security](./security.md)
+- [Observability](./observability.md)
+- [Testing](./testing.md)
+
+## Governance
+
+- [Decisions](./decisions/README.md)
+- [ADR template](./decisions/ADR-000-template.md)
+- [ADR 001](./decisions/ADR-001-modular-monorepo.md)
+- [Meetings](./meetings/README.md)
+- [Meeting template](./meetings/meeting-template.md)
+
+## AI context
+
+- [AI Context](./ai-context.md): stable instructions for coding agents

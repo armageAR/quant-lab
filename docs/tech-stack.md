@@ -1,31 +1,54 @@
 # Tech Stack
 
-## Runtime
+## Current target stack
+
+### Backend
 
 - Node.js
 - TypeScript
-- pnpm
-- Turborepo
-
-## Backend
-
 - NestJS
-- Prisma
-- PostgreSQL
+- Zod
+- Pino
 
-## Frontend
+### Frontend
 
 - Next.js
+- React
+- Tailwind CSS
+- TanStack Query
+- ECharts
+
+### Data
+
+- PostgreSQL
+- Prisma
+
+### Tooling and infrastructure
+
+- pnpm
+- Turborepo
+- Docker
+- CCXT
+
+## Planned infrastructure
+
+- Redis
+- BullMQ
 
 ## Market connectivity
 
-- CCXT
 - Binance
 - Kraken
 
+## Future expansion
+
+- Interactive Brokers
+- Coinbase
+- OKX
+- Bybit
+
 ## Execution model
 
-- Paper trading first
-- Live execution later
-- Future IBKR support
-
+- Backtesting before paper trading
+- Paper trading before live execution
+- Controlled live execution only after approval and risk validation

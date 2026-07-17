@@ -1,24 +1,63 @@
 # Vision
 
-Quant Lab is a research and execution platform for systematic crypto trading.
+## Problem statement
+
+Quantitative trading research usually fragments across notebooks, ad hoc scripts, exchange-specific integrations, and isolated execution logic. That makes it difficult to reproduce results, compare opportunities across venues, and move from research into controlled execution without rewriting the system.
+
+## Product vision
+
+Quant Lab is a multi-market research and trading experimentation platform that unifies market data collection, normalization, strategy research, simulation, backtesting, paper trading, analytics, and controlled execution behind clear architectural boundaries.
+
+The initial implementation focuses on crypto, but the platform must remain compatible with future markets such as stocks, ETFs, forex, futures, options, and other broker-supported instruments.
 
 ## Goals
 
-- Provide a clean path from market data to backtesting, paper trading, and live execution.
-- Keep exchange integrations isolated behind stable interfaces.
-- Make strategy development and iteration fast without coupling strategy logic to transport or persistence concerns.
-- Support observability and analytics from the beginning.
+- Support repeatable quantitative research.
+- Study cross-venue opportunity detection, especially arbitrage.
+- Normalize data across exchanges and later across broader asset classes.
+- Simulate execution with realistic costs and constraints.
+- Produce reproducible backtests and experiment records.
+- Support paper trading before any live routing.
+- Allow controlled live execution only after explicit approval and risk validation.
 
-## Initial scope
+## Non-goals for the initial versions
 
-- Crypto-first
-- Binance and Kraken via CCXT
-- Paper trading before live execution
-- Web dashboard for visibility and operator workflows
+- High-frequency execution infrastructure.
+- Fully automated unattended live trading.
+- Broad multi-asset brokerage coverage on day one.
+- Perfect historical market reconstruction.
+- Broker-specific feature parity in the first iteration.
+- Replacing exchange-native tools that are already sufficient for operational use.
 
-## Future scope
+## Intended users
 
-- Interactive Brokers integration
-- Expanded asset classes and broker/exchange adapters
-- Deeper research tooling and portfolio analytics
+- Quantitative researchers.
+- Strategy developers.
+- Trading operators.
+- Engineers building venue adapters and research tooling.
+- Later, supervised execution operators and risk reviewers.
 
+## Research-first philosophy
+
+Research should proceed from data collection toward simulation only after data quality, normalization, and assumptions are explicit. A strategy is not production-ready because it exists in code. It must pass realistic backtesting, paper trading, and risk review before live execution is even considered.
+
+## Progression
+
+1. Collect market data.
+2. Normalize the data into stable internal models.
+3. Detect candidate opportunities.
+4. Simulate strategy decisions and execution.
+5. Backtest against historical datasets.
+6. Analyze performance, risk, and failure modes.
+7. Validate risk controls.
+8. Run paper trading against live or replayed feeds.
+9. Move to controlled live execution only with approval.
+
+## Early success criteria
+
+- Binance and Kraken data can be ingested and normalized consistently.
+- Cross-exchange arbitrage hypotheses can be studied with fees, depth, and latency accounted for.
+- Backtests can be repeated with the same inputs and produce the same results.
+- Paper trading can track orders, fills, positions, and balances realistically.
+- The dashboard can expose research and operational state without exposing credentials.
+- Live execution remains disabled by default until the platform and process support it safely.
