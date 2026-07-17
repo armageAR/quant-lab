@@ -1,29 +1,25 @@
 {
-  "name": "@quant-lab/exchange-adapters",
+  "name": "@quant-lab/market-ingestion",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "connectivity": "node dist/cli.js",
-    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "lint": "eslint src test --max-warnings=0",
+    "lint": "eslint src --max-warnings=0",
     "test": "vitest run src",
     "test:integration": "vitest run test/integration",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@quant-lab/core": "workspace:*",
+    "@quant-lab/database": "workspace:*",
     "@quant-lab/market-data": "workspace:*",
-    "@quant-lab/shared": "workspace:*",
-    "ccxt": "4.5.66",
-    "dotenv": "^17.2.3",
-    "ws": "^8.18.3"
+    "@quant-lab/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.19.27",
-    "@types/ws": "^8.18.1",
+    "dotenv": "^17.2.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   }

@@ -21,16 +21,29 @@ model PlatformEvent {
 }
 
 model Venue {
-  id           String               @id
-  code         String               @unique
+  id           String                  @id
+  code         String                  @unique
   name         String
   kind         String
   status       String
-  createdAt    DateTime             @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime             @updatedAt @db.Timestamptz(6)
+  createdAt    DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime                @updatedAt @db.Timestamptz(6)
   markets      Market[]
   aliases      MarketAlias[]
   capabilities CapabilitySnapshot[]
+  clockDrifts  ClockDriftMeasurement[]
+}
+
+model ClockDriftMeasurement {
+  id                    String   @id @default(uuid()) @db.Uuid
+  venueId               String
+  sampledAt             DateTime @db.Timestamptz(6)
+  serverTime            DateTime @db.Timestamptz(6)
+  driftMicroseconds     BigInt
+  roundTripMicroseconds BigInt
+  venue                 Venue    @relation(fields: [venueId], references: [id])
+
+  @@index([venueId, sampledAt])
 }
 
 model Instrument {
@@ -59,9 +72,87 @@ model Market {
   aliases      MarketAlias[]
   tradingRules TradingRuleVersion[]
   feeSchedules FeeScheduleVersion[]
+  tickers      MarketTicker[]
+  trades       MarketTrade[]
+  candles      MarketCandle[]
 
   @@unique([venueId, venueSymbol])
   @@index([instrumentId, status, spot])
+}
+
+model RawMarketEnvelope {
+  id              String    @id @default(uuid()) @db.Uuid
+  idempotencyKey  String    @unique
+  venueId         String
+  marketId        String
+  eventType       String
+  eventTime       DateTime? @db.Timestamptz(6)
+  receivedAt      DateTime  @db.Timestamptz(6)
+  processedAt     DateTime  @db.Timestamptz(6)
+  sourcePrecision String
+  payload         Json
+  checksum        String
+  createdAt       DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@index([marketId, eventType, eventTime])
+}
+
+model MarketTicker {
+  id             String    @id @default(uuid()) @db.Uuid
+  idempotencyKey String    @unique
+  marketId       String
+  eventTime      DateTime? @db.Timestamptz(6)
+  receivedAt     DateTime  @db.Timestamptz(6)
+  processedAt    DateTime  @db.Timestamptz(6)
+  bid            Decimal?  @db.Decimal(38, 18)
+  bidQuantity    Decimal?  @db.Decimal(38, 18)
+  ask            Decimal?  @db.Decimal(38, 18)
+  askQuantity    Decimal?  @db.Decimal(38, 18)
+  last           Decimal?  @db.Decimal(38, 18)
+  rawEnvelopeId  String    @db.Uuid
+  market         Market    @relation(fields: [marketId], references: [id])
+
+  @@index([marketId, eventTime, id])
+}
+
+model MarketTrade {
+  id             String    @id @default(uuid()) @db.Uuid
+  idempotencyKey String    @unique
+  marketId       String
+  venueTradeId   String
+  side           String
+  price          Decimal   @db.Decimal(38, 18)
+  quantity       Decimal   @db.Decimal(38, 18)
+  eventTime      DateTime? @db.Timestamptz(6)
+  receivedAt     DateTime  @db.Timestamptz(6)
+  processedAt    DateTime  @db.Timestamptz(6)
+  rawEnvelopeId  String    @db.Uuid
+  market         Market    @relation(fields: [marketId], references: [id])
+
+  @@unique([marketId, venueTradeId])
+  @@index([marketId, eventTime, id])
+}
+
+model MarketCandle {
+  id             String   @id @default(uuid()) @db.Uuid
+  idempotencyKey String   @unique
+  marketId       String
+  interval       String
+  openedAt       DateTime @db.Timestamptz(6)
+  closedAt       DateTime @db.Timestamptz(6)
+  open           Decimal  @db.Decimal(38, 18)
+  high           Decimal  @db.Decimal(38, 18)
+  low            Decimal  @db.Decimal(38, 18)
+  close          Decimal  @db.Decimal(38, 18)
+  volume         Decimal  @db.Decimal(38, 18)
+  tradeCount     String?
+  receivedAt     DateTime @db.Timestamptz(6)
+  processedAt    DateTime @db.Timestamptz(6)
+  rawEnvelopeId  String   @db.Uuid
+  market         Market   @relation(fields: [marketId], references: [id])
+
+  @@unique([marketId, interval, openedAt])
+  @@index([marketId, interval, openedAt, id])
 }
 
 model MarketAlias {

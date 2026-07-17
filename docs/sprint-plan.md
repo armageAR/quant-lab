@@ -202,6 +202,8 @@ Acceptance:
 
 ### Sprint 2.4: Ticker, trade, and candle ingestion
 
+**Status:** complete. REST backfill, native Binance/Kraken ticker WebSockets, idempotent raw and normalized persistence, bounded historical queries, drift samples, retention, ingestion metrics, reconnect/gap tests, and a concurrent 60-second live validation are implemented.
+
 **Goal:** collect normalized time-series evidence reliably.
 
 Tasks:

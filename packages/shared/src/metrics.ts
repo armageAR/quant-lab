@@ -13,6 +13,11 @@ export interface ApplicationMetrics {
   httpRequests: Counter;
   registry: Registry;
   workerReady: Gauge;
+  ingestedEvents: Counter;
+  ingestionDuplicates: Counter;
+  ingestionGaps: Counter;
+  ingestionRejected: Counter;
+  ingestionLag: Histogram;
 }
 
 export function createApplicationMetrics(app: string): ApplicationMetrics {
@@ -48,6 +53,37 @@ export function createApplicationMetrics(app: string): ApplicationMetrics {
       help: 'HTTP request duration in seconds.',
       labelNames: ['method', 'route', 'status'] as const,
       registers: [registry],
+    }),
+    ingestedEvents: new Counter({
+      name: 'quant_lab_ingested_events_total',
+      help: 'Persisted market events.',
+      labelNames: ['venue', 'type'] as const,
+      registers: [registry],
+    }),
+    ingestionDuplicates: new Counter({
+      name: 'quant_lab_ingestion_duplicates_total',
+      help: 'Duplicate market events rejected.',
+      labelNames: ['venue', 'type'] as const,
+      registers: [registry],
+    }),
+    ingestionGaps: new Counter({
+      name: 'quant_lab_ingestion_gaps_total',
+      help: 'Detected ingestion gaps.',
+      labelNames: ['venue', 'type'] as const,
+      registers: [registry],
+    }),
+    ingestionRejected: new Counter({
+      name: 'quant_lab_ingestion_rejected_total',
+      help: 'Rejected market events.',
+      labelNames: ['venue', 'type'] as const,
+      registers: [registry],
+    }),
+    ingestionLag: new Histogram({
+      name: 'quant_lab_ingestion_lag_seconds',
+      help: 'Delay from venue event time to receipt.',
+      labelNames: ['venue', 'type'] as const,
+      registers: [registry],
+      buckets: [0.01, 0.05, 0.1, 0.5, 1, 5, 30],
     }),
   };
 }

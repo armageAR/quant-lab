@@ -65,6 +65,9 @@ importers:
       '@quant-lab/market-catalog':
         specifier: workspace:*
         version: link:../../packages/market-catalog
+      '@quant-lab/market-ingestion':
+        specifier: workspace:*
+        version: link:../../packages/market-ingestion
       '@quant-lab/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -148,6 +151,9 @@ importers:
       '@quant-lab/market-catalog':
         specifier: workspace:*
         version: link:../../packages/market-catalog
+      '@quant-lab/market-ingestion':
+        specifier: workspace:*
+        version: link:../../packages/market-ingestion
       '@quant-lab/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -229,10 +235,16 @@ importers:
       dotenv:
         specifier: ^17.2.3
         version: 17.4.2
+      ws:
+        specifier: ^8.18.3
+        version: 8.21.0(bufferutil@4.1.0)
     devDependencies:
       '@types/node':
         specifier: ^20.19.27
         version: 20.19.43
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -274,6 +286,34 @@ importers:
       '@types/node':
         specifier: ^20.19.27
         version: 20.19.43
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@20.19.43)(vite@8.1.5(@types/node@20.19.43)(jiti@2.7.0)(terser@5.49.0))
+
+  packages/market-ingestion:
+    dependencies:
+      '@quant-lab/core':
+        specifier: workspace:*
+        version: link:../core
+      '@quant-lab/database':
+        specifier: workspace:*
+        version: link:../database
+      '@quant-lab/market-data':
+        specifier: workspace:*
+        version: link:../market-data
+      '@quant-lab/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.27
+        version: 20.19.43
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.4.2
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -1587,6 +1627,12 @@ packages:
     resolution:
       {
         integrity: sha512-8mam4H1NHLtu7nmtalF7eyBH14QyOASmcxHhSfEoRyr0nP/YdoesEtU+uSRvMe96TW/HPTtkoKqQLl53N7UXMQ==,
+      }
+
+  '@types/ws@8.18.1':
+    resolution:
+      {
+        integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==,
       }
 
   '@typescript-eslint/eslint-plugin@8.64.0':
@@ -5609,6 +5655,10 @@ snapshots:
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
+      '@types/node': 20.19.43
+
+  '@types/ws@8.18.1':
+    dependencies:
       '@types/node': 20.19.43
 
   '@typescript-eslint/eslint-plugin@8.64.0(@typescript-eslint/parser@8.64.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)':

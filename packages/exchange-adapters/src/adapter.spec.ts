@@ -57,6 +57,15 @@ function fakeClient(
       Promise.resolve({
         'BTC/USDT': { symbol: 'BTC/USDT', maker: '0.0009', taker: '0.001' },
       }),
+    fetchTicker: () =>
+      Promise.resolve({
+        timestamp: 1_700_000_000_000,
+        bid: '100',
+        ask: '101',
+        last: '100.5',
+      }),
+    fetchTrades: () => Promise.resolve([]),
+    fetchOHLCV: () => Promise.resolve([]),
     inspectPermissions: () => Promise.resolve(permissions),
     close: () => Promise.resolve(),
   };
