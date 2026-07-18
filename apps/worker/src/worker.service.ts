@@ -121,7 +121,8 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
       this.#backtestExecution = backtests
         .executeNext((run, events, control) =>
           executeArbitrageBacktest(run, events, {
-            checkpoint: control.checkpoint,
+            checkpoint: (processed, total) =>
+              control.checkpoint(processed, total),
           }),
         )
         .then(() => undefined)

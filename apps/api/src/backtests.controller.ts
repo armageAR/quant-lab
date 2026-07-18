@@ -41,9 +41,9 @@ export class BacktestsController {
   ) {}
 
   @Post('experiments')
-  createExperiment(@Body() body: ExperimentBody) {
+  async createExperiment(@Body() body: ExperimentBody) {
     try {
-      return this.backtests.createExperiment(
+      return await this.backtests.createExperiment(
         body.name ?? '',
         body.hypothesis ?? '',
       );
@@ -58,11 +58,11 @@ export class BacktestsController {
   }
 
   @Post('runs')
-  queue(@Body() body: RunBody) {
+  async queue(@Body() body: RunBody) {
     if (!body.experimentId || !body.datasetId)
       throw new BadRequestException('experimentId and datasetId are required');
     try {
-      return this.backtests.queue({
+      return await this.backtests.queue({
         experimentId: body.experimentId,
         datasetId: body.datasetId,
         seed: body.seed ?? 1,

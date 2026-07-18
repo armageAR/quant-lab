@@ -51,11 +51,20 @@ describe('BacktestsController', () => {
     );
   });
 
-  it('rejects an unscoped run', () => {
+  it('rejects an unscoped run', async () => {
     const { api } = controller();
-    expect(() => api.queue({})).toThrow(
+    await expect(api.queue({})).rejects.toThrow(
       'experimentId and datasetId are required',
     );
+  });
+
+  it('maps asynchronous service validation failures to bad requests', async () => {
+    const { api, runs } = controller();
+    runs.queue.mockRejectedValueOnce(new Error('missing model version: fees'));
+
+    await expect(
+      api.queue({ experimentId: 'experiment-1', datasetId: 'dataset-1' }),
+    ).rejects.toThrow('missing model version: fees');
   });
 
   it('parses comparison ids and delegates CSV export', async () => {
