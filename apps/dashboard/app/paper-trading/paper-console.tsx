@@ -68,8 +68,9 @@ export function PaperConsole({
       const rows = await request<Session[]>('/paper-trading/sessions');
       setSessions(rows);
       if (!selectedId && rows[0]) setSelectedId(rows[0].id);
+      setMessage('');
     } catch {
-      /* preserve current operator context */
+      /* polling errors are transient — keep current state */
     }
   };
   useEffect(() => {
@@ -77,7 +78,7 @@ export function PaperConsole({
       if (!document.hidden) void refresh();
     }, 4000);
     return () => window.clearInterval(timer);
-  });
+  }, []);
   const mutate = async (work: () => Promise<void>) => {
     if (busy) return;
     setBusy(true);

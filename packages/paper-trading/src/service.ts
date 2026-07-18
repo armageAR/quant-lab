@@ -453,25 +453,27 @@ export class PaperTradingService {
           },
         },
       );
-    const simulatedProfit = canonical(
-      decimal(sellPrice)
-        .minus(buyPrice)
-        .times(quantity)
-        .minus(
-          decimal(buyPrice)
-            .times(quantity)
-            .times(opportunity.buyTakerFee.toString()),
-        )
-        .minus(
-          decimal(sellPrice)
-            .times(quantity)
-            .times(opportunity.sellTakerFee.toString()),
-        ),
-    );
-    await this.database.paperOrder.updateMany({
-      where: { id: sell.id, status: 'filled' },
-      data: { simulatedProfit },
-    });
+    if (buy.status === 'reserved' && sell.status === 'reserved') {
+      const simulatedProfit = canonical(
+        decimal(sellPrice)
+          .minus(buyPrice)
+          .times(quantity)
+          .minus(
+            decimal(buyPrice)
+              .times(quantity)
+              .times(opportunity.buyTakerFee.toString()),
+          )
+          .minus(
+            decimal(sellPrice)
+              .times(quantity)
+              .times(opportunity.sellTakerFee.toString()),
+          ),
+      );
+      await this.database.paperOrder.updateMany({
+        where: { id: sell.id, status: 'filled' },
+        data: { simulatedProfit },
+      });
+    }
     return {
       buy: await this.database.paperOrder.findUniqueOrThrow({
         where: { id: buy.id },
