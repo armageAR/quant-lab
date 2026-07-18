@@ -1,3 +1,6 @@
+import { InfoButton } from '../components/info-button';
+import { formatDateTime } from '../lib/time';
+
 interface Eligibility {
   eligible: boolean;
   reasons: string[];
@@ -141,5 +144,3 @@ export default async function BacktestsPage() {
     </main>
   );
 }
-import { InfoButton } from '../components/info-button';
-import { formatDateTime } from '../lib/time';
