@@ -286,6 +286,25 @@ Acceptance:
 - Every result is reproducible from persisted input references and detector configuration.
 - Stale or invalid books are rejected with a measurable reason.
 
+### Sprint 3.1.1: Continuous observation worker
+
+**Status:** complete on branch `agent/sprint-3-1-1-continuous-observation`. The worker now runs non-overlapping read-only observation cycles with bounded backoff, status reporting, dashboard visibility, and graceful shutdown.
+
+**Goal:** continuously collect configured spot books and evaluate observed opportunities without manual commands.
+
+Tasks:
+
+- Run catalog refresh, REST order-book snapshots, and observed detection from the long-lived worker.
+- Prevent overlapping cycles and apply bounded exponential backoff after failures.
+- Expose cycle state, last success, errors, and counts through worker status and dashboard.
+- Stop active work and exchange clients cleanly during application shutdown.
+
+Acceptance:
+
+- Starting the worker is sufficient to keep observations current when exchange connectivity is enabled.
+- A failed cycle is visible and retried without terminating the worker or creating overlapping requests.
+- Manual catalog, ingestion, and detector commands remain usable for diagnostics.
+
 ### Sprint 3.2: Executable opportunity model
 
 **Goal:** estimate realizable profit for configured trade sizes.

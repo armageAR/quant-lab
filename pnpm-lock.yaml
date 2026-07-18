@@ -155,12 +155,18 @@ importers:
       '@quant-lab/market-catalog':
         specifier: workspace:*
         version: link:../../packages/market-catalog
+      '@quant-lab/market-data':
+        specifier: workspace:*
+        version: link:../../packages/market-data
       '@quant-lab/market-ingestion':
         specifier: workspace:*
         version: link:../../packages/market-ingestion
       '@quant-lab/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@quant-lab/strategy-engine':
+        specifier: workspace:*
+        version: link:../../packages/strategy-engine
       dotenv:
         specifier: ^17.2.3
         version: 17.4.2
