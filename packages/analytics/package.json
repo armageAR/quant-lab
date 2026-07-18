@@ -1,0 +1,25 @@
+{
+  "name": "@quant-lab/analytics",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint src --max-warnings=0",
+    "test": "vitest run src",
+    "test:integration": "vitest run test/integration --no-file-parallelism",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@quant-lab/database": "workspace:*",
+    "@quant-lab/market-ingestion": "workspace:*",
+    "decimal.js": "^10.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.27",
+    "dotenv": "^17.2.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
+  }
+}
