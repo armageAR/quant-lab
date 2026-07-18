@@ -576,24 +576,46 @@ export class MarketEventStore {
     envelopes: number;
   }> {
     return this.database.$transaction(async (tx) => {
+      const protectedEvents = await tx.datasetEvent.findMany({
+        where: { manifest: { pinnedAt: { not: null } } },
+        select: { eventType: true, sourceId: true },
+      });
+      const protectedIds = (types: readonly string[]) =>
+        protectedEvents
+          .filter((event) => types.includes(event.eventType))
+          .map((event) => event.sourceId);
       const tickers = (
         await tx.marketTicker.deleteMany({
-          where: { receivedAt: { lt: cutoff } },
+          where: {
+            receivedAt: { lt: cutoff },
+            id: { notIn: protectedIds(['ticker']) },
+          },
         })
       ).count;
       const trades = (
         await tx.marketTrade.deleteMany({
-          where: { receivedAt: { lt: cutoff } },
+          where: {
+            receivedAt: { lt: cutoff },
+            id: { notIn: protectedIds(['trade']) },
+          },
         })
       ).count;
       const candles = (
         await tx.marketCandle.deleteMany({
-          where: { receivedAt: { lt: cutoff } },
+          where: {
+            receivedAt: { lt: cutoff },
+            id: { notIn: protectedIds(['candle']) },
+          },
         })
       ).count;
       const orderBooks = (
         await tx.marketOrderBookEvent.deleteMany({
-          where: { receivedAt: { lt: cutoff } },
+          where: {
+            receivedAt: { lt: cutoff },
+            id: {
+              notIn: protectedIds(['order_book_snapshot', 'order_book_delta']),
+            },
+          },
         })
       ).count;
       const bookInvalidations = (
@@ -603,7 +625,10 @@ export class MarketEventStore {
       ).count;
       const envelopes = (
         await tx.rawMarketEnvelope.deleteMany({
-          where: { receivedAt: { lt: cutoff } },
+          where: {
+            receivedAt: { lt: cutoff },
+            id: { notIn: protectedEvents.map((event) => event.sourceId) },
+          },
         })
       ).count;
       return {

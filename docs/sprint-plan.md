@@ -244,6 +244,8 @@ Acceptance:
 
 ### Sprint 2.6: Historical datasets and data quality
 
+**Status:** complete on branch `agent/sprint-2-6-historical-datasets`. PostgreSQL historical queries, immutable manifests, stable checksums, quality reports, pin/export/compaction, retention protection, API and CLI operations are implemented.
+
 **Goal:** make collected data usable and reproducible for research.
 
 Tasks:

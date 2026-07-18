@@ -19,6 +19,7 @@
     "market:ingest": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker market:ingest",
     "market:stream": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker market:stream",
     "market:retain": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker market:retain",
+    "dataset": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker dataset",
     "typecheck": "turbo typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -7,6 +7,14 @@ type PermissionAwareExchange = {
   id: string;
   has: Record<string, boolean | string | undefined>;
   number: (value: string) => string;
+  safeString(value: unknown, key: number): string | undefined;
+  safeInteger(value: unknown, key: number): number | undefined;
+  parseOrderBookBidAsk(
+    bidask: unknown,
+    priceKey?: number,
+    amountKey?: number,
+    countOrIdKey?: number,
+  ): Array<string | number | undefined>;
   loadMarkets(reload?: boolean): Promise<unknown>;
   fetchTime(): Promise<number>;
   fetchBalance(): Promise<unknown>;
@@ -37,6 +45,19 @@ export function createCcxtReadOnlyClient(
     timeout: config.timeoutMilliseconds,
   }) as unknown as PermissionAwareExchange;
   exchange.number = String;
+  exchange.parseOrderBookBidAsk = function (
+    bidask,
+    priceKey = 0,
+    amountKey = 1,
+    countOrIdKey = 2,
+  ) {
+    const price = this.safeString(bidask, priceKey);
+    const amount = this.safeString(bidask, amountKey);
+    const countOrId = this.safeInteger(bidask, countOrIdKey);
+    return countOrId === undefined
+      ? [price, amount]
+      : [price, amount, countOrId];
+  };
   if (config.sandbox) exchange.setSandboxMode(true);
 
   const inspectPermissions = async (): Promise<unknown> => {
