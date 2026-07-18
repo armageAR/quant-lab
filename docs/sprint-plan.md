@@ -410,6 +410,27 @@ Acceptance:
 - Runs can be compared without losing parameter or dataset provenance.
 - Paper-trading eligibility is a documented validation decision, not a runtime dependency.
 
+### Sprint 4.4: Backtest operations UI
+
+**Status:** planned. See the [Backtest Operations UI Plan](./backtest-operations-ui-plan.md).
+
+**Goal:** operate the complete deterministic backtest workflow from the dashboard without terminal commands.
+
+Tasks:
+
+- Add dataset discovery and the missing bounded read contracts.
+- Add a same-origin dashboard BFF for safe reads and explicit mutations.
+- Build dataset, experiment, run configuration, sweep, queue, lifecycle-control, result, comparison, and export interfaces.
+- Preserve exact-decimal inputs, immutable provenance, GMT-3 display, and explicit validation gates.
+- Add polling that preserves filters and operator context.
+- Cover offline, error, empty, mobile, and accessibility states.
+
+Acceptance:
+
+- A single operator can select evidence, create an experiment, queue and control a run, inspect results, compare runs, and export CSV entirely from the web UI.
+- The UI cannot bypass dataset, configuration, provenance, state-transition, or live-execution safeguards.
+- The browser-level workflow and supported repository quality gate pass.
+
 ## Phase 5: Paper trading
 
 ### Sprint 5.1: Accounting and simulated execution
