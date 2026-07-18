@@ -1,6 +1,7 @@
 import type { DatabaseClient } from '@quant-lab/database';
 import type { MarketCatalog } from '@quant-lab/market-catalog';
 import type {
+  ExecutableOpportunityService,
   MarketEventStore,
   ObservedOpportunityService,
 } from '@quant-lab/market-ingestion';
@@ -80,6 +81,85 @@ describe('ObservationLoop', () => {
       observed: 1,
       rejected: 1,
       consecutiveFailures: 0,
+    });
+  });
+
+  it('runs the executable stage and reports its counters when configured', async () => {
+    const markets = [
+      { id: 'BINANCE:BTCUSDT', venueId: 'BINANCE' },
+      { id: 'KRAKEN:XBTUSDT', venueId: 'KRAKEN' },
+    ];
+    const database = {
+      market: { findMany: vi.fn().mockResolvedValue(markets) },
+    } as unknown as DatabaseClient;
+    const providers = markets.map((market) => ({
+      venue: { id: market.venueId },
+      listMarkets: vi.fn(),
+      getTradingRules: vi.fn(),
+      getEffectiveFees: vi.fn(),
+      getCapabilities: vi.fn(),
+      fetchOrderBook: vi.fn().mockResolvedValue({ marketId: market.id }),
+    }));
+    const observedEvaluate = vi
+      .fn()
+      .mockResolvedValue([{ classification: 'observed' }]);
+    const executableEvaluate = vi
+      .fn()
+      .mockResolvedValue([
+        { classification: 'executable' },
+        { classification: 'missed' },
+        { classification: 'observed' },
+      ]);
+    const loop = new ObservationLoop(
+      database,
+      providers as unknown as ConstructorParameters<typeof ObservationLoop>[1],
+      { refresh: vi.fn().mockResolvedValue([]) } as unknown as MarketCatalog,
+      {
+        storeOrderBook: vi.fn().mockResolvedValue(true),
+      } as unknown as MarketEventStore,
+      {
+        evaluateAll: observedEvaluate,
+      } as unknown as ObservedOpportunityService,
+      {
+        intervalMs: 10_000,
+        catalogRefreshMs: 60_000,
+        orderBookDepth: 100,
+        maxBackoffMs: 60_000,
+        markets: ['BTC/USDT'],
+        detector: {
+          id: 'cross-venue-observed',
+          version: '1.0.0',
+          maximumBookAgeMs: 5_000,
+          maximumCrossVenueSkewMs: 1_000,
+          minimumObservedSpread: '0',
+        },
+      },
+      { info: vi.fn(), error: vi.fn() } as unknown as Logger,
+      {
+        service: {
+          evaluateAll: executableEvaluate,
+        } as unknown as ExecutableOpportunityService,
+        detector: {
+          id: 'cross-venue-executable',
+          version: '1.0.0',
+          maximumBookAgeMs: 5_000,
+          maximumCrossVenueSkewMs: 1_000,
+          tradeSizes: ['1'],
+          slippageBufferRate: '0',
+          latencyBufferMs: 250,
+          minimumNetProfitRate: '0',
+          inventory: {},
+        },
+      },
+    );
+
+    await loop.runOnce(new Date('2026-07-18T00:00:00Z'));
+
+    expect(executableEvaluate).toHaveBeenCalledOnce();
+    expect(loop.status()).toMatchObject({
+      executableEvaluations: 3,
+      executable: 1,
+      missed: 1,
     });
   });
 

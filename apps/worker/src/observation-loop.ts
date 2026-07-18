@@ -4,10 +4,14 @@ import type {
   MarketCatalogProvider,
 } from '@quant-lab/market-catalog';
 import type {
+  ExecutableOpportunityService,
   MarketEventStore,
   ObservedOpportunityService,
 } from '@quant-lab/market-ingestion';
-import type { ObservedDetectorConfig } from '@quant-lab/strategy-engine';
+import type {
+  ExecutableDetectorConfig,
+  ObservedDetectorConfig,
+} from '@quant-lab/strategy-engine';
 import type { OrderBook } from '@quant-lab/market-data';
 import type { Logger } from 'pino';
 
@@ -24,6 +28,11 @@ export interface ObservationLoopConfig {
   detector: ObservedDetectorConfig;
 }
 
+export interface ExecutableStage {
+  service: ExecutableOpportunityService;
+  detector: ExecutableDetectorConfig;
+}
+
 export interface ObservationStatus {
   state: 'idle' | 'running' | 'backoff' | 'stopped';
   cycles: number;
@@ -37,6 +46,9 @@ export interface ObservationStatus {
   evaluations: number;
   observed: number;
   rejected: number;
+  executableEvaluations: number;
+  executable: number;
+  missed: number;
 }
 
 type Timer = ReturnType<typeof setTimeout>;
@@ -54,6 +66,9 @@ export class ObservationLoop {
     evaluations: 0,
     observed: 0,
     rejected: 0,
+    executableEvaluations: 0,
+    executable: 0,
+    missed: 0,
   };
 
   constructor(
@@ -64,6 +79,7 @@ export class ObservationLoop {
     private readonly opportunities: ObservedOpportunityService,
     private readonly config: ObservationLoopConfig,
     private readonly logger: Logger,
+    private readonly executable?: ExecutableStage,
   ) {}
 
   start(): void {
@@ -126,6 +142,19 @@ export class ObservationLoop {
       (result) => result.classification === 'observed',
     ).length;
     this.#status.rejected = results.length - this.#status.observed;
+    if (this.executable) {
+      const executableResults = await this.executable.service.evaluateAll(
+        this.executable.detector,
+        new Date(),
+      );
+      this.#status.executableEvaluations = executableResults.length;
+      this.#status.executable = executableResults.filter(
+        (result) => result.classification === 'executable',
+      ).length;
+      this.#status.missed = executableResults.filter(
+        (result) => result.classification === 'missed',
+      ).length;
+    }
     this.#status.lastCompletedAt = new Date().toISOString();
     this.#status.lastSuccessAt = this.#status.lastCompletedAt;
     delete this.#status.lastError;

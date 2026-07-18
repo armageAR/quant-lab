@@ -2,6 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import type { DatabaseLifecycle } from '@quant-lab/database';
 import { MarketCatalog } from '@quant-lab/market-catalog';
 import {
+  ExecutableOpportunityService,
   HistoricalDatasetService,
   MarketEventStore,
   ObservedOpportunityService,
@@ -12,10 +13,12 @@ import { HealthController } from './health.controller';
 import { DatasetsController } from './datasets.controller';
 import { MetricsController } from './metrics.controller';
 import { OpportunitiesController } from './opportunities.controller';
+import { ExecutableOpportunitiesController } from './executable-opportunities.controller';
 import { MarketsController } from './markets.controller';
 import {
   DATABASE,
   DATASETS,
+  EXECUTABLE_OPPORTUNITIES,
   MARKET_CATALOG,
   MARKET_EVENTS,
   METRICS,
@@ -36,6 +39,7 @@ export class AppModule {
         MarketsController,
         DatasetsController,
         OpportunitiesController,
+        ExecutableOpportunitiesController,
       ],
       providers: [
         { provide: DATABASE, useValue: database },
@@ -55,6 +59,10 @@ export class AppModule {
         {
           provide: OPPORTUNITIES,
           useValue: new ObservedOpportunityService(database.client),
+        },
+        {
+          provide: EXECUTABLE_OPPORTUNITIES,
+          useValue: new ExecutableOpportunityService(database.client),
         },
       ],
     };
