@@ -1,4 +1,11 @@
-import { IBApiNext, SecType, type ContractDetails } from '@stoqey/ib';
+import {
+  BarSizeSetting,
+  IBApiNext,
+  SecType,
+  WhatToShow,
+  type Bar,
+  type ContractDetails,
+} from '@stoqey/ib';
 
 import type { IbkrConfig } from './config';
 
@@ -7,6 +14,7 @@ export interface IbkrGatewayClient {
   currentTime(): Promise<Date>;
   managedAccounts(): Promise<readonly string[]>;
   contractDetails(conId: number): Promise<readonly ContractDetails[]>;
+  historicalBars(conId: number, duration: string): Promise<readonly Bar[]>;
   disconnect(): Promise<void>;
 }
 
@@ -56,6 +64,21 @@ export class TwsIbkrGatewayClient implements IbkrGatewayClient {
         secType: SecType.STK,
         currency: 'USD',
       }),
+      this.config.IBKR_TIMEOUT_MS,
+    );
+  }
+
+  historicalBars(conId: number, duration: string): Promise<Bar[]> {
+    return withTimeout(
+      this.#api.getHistoricalData(
+        { conId, exchange: 'SMART', secType: SecType.STK, currency: 'USD' },
+        undefined,
+        duration,
+        BarSizeSetting.MINUTES_ONE,
+        WhatToShow.TRADES,
+        this.config.IBKR_REGULAR_TRADING_HOURS_ONLY,
+        2,
+      ),
       this.config.IBKR_TIMEOUT_MS,
     );
   }

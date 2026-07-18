@@ -30,6 +30,7 @@ function client(accounts = ['DU123']): IbkrGatewayClient {
     currentTime: vi.fn(() => Promise.resolve(new Date('2026-07-18T17:00:00Z'))),
     managedAccounts: vi.fn(() => Promise.resolve(accounts)),
     contractDetails: vi.fn(() => Promise.resolve([fixture()])),
+    historicalBars: vi.fn(() => Promise.resolve([])),
     disconnect: vi.fn(() => Promise.resolve()),
   };
 }

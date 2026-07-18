@@ -3,8 +3,9 @@ import {
   IbkrReadOnlyAdapter,
   TwsIbkrGatewayClient,
   loadIbkrConfig,
+  normalizeHistoricalBar,
 } from '@quant-lab/ibkr-adapter';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 export interface IbkrContractView {
   id: string;
@@ -80,5 +81,49 @@ export class IbkrService {
       contractCount: report.contracts.length,
       latencyMs: report.latencyMs,
     };
+  }
+
+  async refreshHistory(): Promise<{ requestId: string; stored: number }> {
+    const config = loadIbkrConfig(process.env);
+    if (!config.IBKR_CONNECTIVITY_ENABLED || !config.IBKR_PAPER_ENABLED)
+      throw new Error('IBKR paper connectivity is disabled');
+    const client = new TwsIbkrGatewayClient(config);
+    const requestId = randomUUID();
+    let stored = 0;
+    await client.connect();
+    try {
+      for (const conId of config.IBKR_CONTRACT_IDS) {
+        const started = Date.now();
+        const receivedAt = new Date();
+        const bars = await client.historicalBars(conId, '1 D');
+        const latencyMs = Date.now() - started;
+        for (const raw of bars) {
+          const bar = normalizeHistoricalBar(conId, raw, receivedAt);
+          await this.database.ibkrHistoricalBar.upsert({
+            where: {
+              conId_eventTime_sourcePrecision: {
+                conId: bar.conId,
+                eventTime: new Date(bar.eventTime),
+                sourcePrecision: bar.sourcePrecision,
+              },
+            },
+            create: {
+              ...bar,
+              eventTime: new Date(bar.eventTime),
+              receivedAt: new Date(bar.receivedAt),
+              processedAt: new Date(bar.processedAt),
+              requestId,
+              useRth: config.IBKR_REGULAR_TRADING_HOURS_ONLY,
+              latencyMs,
+            },
+            update: {},
+          });
+          stored += 1;
+        }
+      }
+    } finally {
+      await client.disconnect();
+    }
+    return { requestId, stored };
   }
 }

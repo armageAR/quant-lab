@@ -553,6 +553,8 @@ Delivery order:
 
 **Sprint 6.3 status:** complete on branch `agent/phase-6-strategy-ibkr`.
 
+**Sprint 6.4 status:** complete on branch `agent/phase-6-strategy-ibkr`.
+
 ADRs, CEDEARs, BYMA, Argentine brokers, and live IBKR orders are explicitly
 deferred.
 

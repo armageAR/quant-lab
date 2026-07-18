@@ -20,4 +20,9 @@ export class IbkrController {
   refresh(): Promise<IbkrRefreshView> {
     return this.service.refresh();
   }
+
+  @Post('market-data/refresh')
+  refreshMarketData(): Promise<{ requestId: string; stored: number }> {
+    return this.service.refreshHistory();
+  }
 }
