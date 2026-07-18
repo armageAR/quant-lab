@@ -517,6 +517,8 @@ Acceptance:
 
 ### Sprint 6.2: Portfolio rules and experiment orchestration
 
+**Status:** complete on branch `agent/phase-6-strategy-ibkr`.
+
 **Goal:** coordinate strategies, experiments, and portfolio constraints consistently.
 
 Tasks:

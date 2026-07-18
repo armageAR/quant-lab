@@ -67,6 +67,16 @@ const apiGroups: Array<
     ],
   ],
   [
+    'Estrategias',
+    [
+      { method: 'GET', path: '/strategy-runs' },
+      { method: 'POST', path: '/strategy-runs' },
+      { method: 'POST', path: '/strategy-runs/versions' },
+      { method: 'POST', path: '/strategy-runs/parameter-sets' },
+      { method: 'POST', path: '/strategy-runs/:id/:action' },
+    ],
+  ],
+  [
     'Paper trading',
     [
       { method: 'GET', path: '/paper-trading/sessions' },
@@ -133,6 +143,12 @@ export function TopNav() {
             href="/backtests"
           >
             <ReplayIcon /> <span>Backtests</span>
+          </a>
+          <a
+            aria-current={pathname === '/strategies' ? 'page' : undefined}
+            href="/strategies"
+          >
+            <ReplayIcon /> <span>Estrategias</span>
           </a>
           <a
             aria-current={pathname === '/paper-trading' ? 'page' : undefined}

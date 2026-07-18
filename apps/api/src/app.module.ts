@@ -25,6 +25,8 @@ import { ResearchController } from './research.controller';
 import { MarketsController } from './markets.controller';
 import { BacktestsController } from './backtests.controller';
 import { PaperTradingController } from './paper-trading.controller';
+import { StrategyRunsController } from './strategy-runs.controller';
+import { StrategyRunsService } from './strategy-runs.service';
 import {
   DATABASE,
   DATASETS,
@@ -37,6 +39,7 @@ import {
   BACKTESTS,
   BACKTEST_ANALYTICS,
   PAPER_TRADING,
+  STRATEGY_RUNS,
 } from './tokens';
 
 @Module({})
@@ -57,6 +60,7 @@ export class AppModule {
         ResearchController,
         BacktestsController,
         PaperTradingController,
+        StrategyRunsController,
       ],
       providers: [
         { provide: DATABASE, useValue: database },
@@ -99,6 +103,10 @@ export class AppModule {
         {
           provide: PAPER_TRADING,
           useValue: new PaperTradingService(database.client),
+        },
+        {
+          provide: STRATEGY_RUNS,
+          useValue: new StrategyRunsService(database.client),
         },
       ],
     };

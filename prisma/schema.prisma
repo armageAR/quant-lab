@@ -552,15 +552,66 @@ model StrategyDefinition {
 }
 
 model StrategyVersion {
-  id                  String             @id @default(uuid()) @db.Uuid
+  id                  String                 @id @default(uuid()) @db.Uuid
   strategyId          String
   version             String
   commitSha           String
   configurationSchema Json
   requirements        Json
-  createdAt           DateTime           @default(now()) @db.Timestamptz(6)
-  strategy            StrategyDefinition @relation(fields: [strategyId], references: [id])
+  createdAt           DateTime               @default(now()) @db.Timestamptz(6)
+  strategy            StrategyDefinition     @relation(fields: [strategyId], references: [id])
+  parameterSets       StrategyParameterSet[]
+  runs                StrategyRun[]
 
   @@unique([strategyId, version])
   @@index([strategyId, createdAt])
+}
+
+model StrategyParameterSet {
+  id                String          @id @default(uuid()) @db.Uuid
+  strategyVersionId String          @db.Uuid
+  name              String
+  parameters        Json
+  fingerprint       String          @unique
+  createdAt         DateTime        @default(now()) @db.Timestamptz(6)
+  strategyVersion   StrategyVersion @relation(fields: [strategyVersionId], references: [id])
+  runs              StrategyRun[]
+
+  @@index([strategyVersionId, createdAt])
+}
+
+model StrategyRun {
+  id                String                  @id @default(uuid()) @db.Uuid
+  strategyVersionId String                  @db.Uuid
+  parameterSetId    String                  @db.Uuid
+  status            String
+  inputKind         String
+  inputReference    String
+  sourceCommit      String
+  attempt           Int                     @default(1)
+  scheduledAt       DateTime                @default(now()) @db.Timestamptz(6)
+  startedAt         DateTime?               @db.Timestamptz(6)
+  completedAt       DateTime?               @db.Timestamptz(6)
+  error             String?
+  createdAt         DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime                @updatedAt @db.Timestamptz(6)
+  strategyVersion   StrategyVersion         @relation(fields: [strategyVersionId], references: [id])
+  parameterSet      StrategyParameterSet    @relation(fields: [parameterSetId], references: [id])
+  auditEvents       StrategyRunAuditEvent[]
+
+  @@index([status, scheduledAt])
+  @@index([strategyVersionId, createdAt])
+}
+
+model StrategyRunAuditEvent {
+  id            String      @id @default(uuid()) @db.Uuid
+  strategyRunId String      @db.Uuid
+  fromStatus    String?
+  toStatus      String
+  reason        String
+  details       Json
+  createdAt     DateTime    @default(now()) @db.Timestamptz(6)
+  strategyRun   StrategyRun @relation(fields: [strategyRunId], references: [id])
+
+  @@index([strategyRunId, createdAt])
 }

@@ -6,6 +6,7 @@ const ALLOWED_ROOTS = new Set([
   'datasets',
   'markets',
   'paper-trading',
+  'strategy-runs',
 ]);
 
 async function proxy(
