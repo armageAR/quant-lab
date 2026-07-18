@@ -11,6 +11,7 @@
     "market:stream": "node dist/market-stream.js",
     "market:retain": "node dist/market-retain.js",
     "dataset": "node dist/dataset.js",
+    "opportunity:detect": "node dist/opportunity-detect.js",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"

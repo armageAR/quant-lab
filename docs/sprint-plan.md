@@ -267,6 +267,8 @@ Acceptance:
 
 ### Sprint 3.1: Observed opportunity detector
 
+**Status:** complete on branch `agent/sprint-3-1-observed-opportunities`. A versioned exact-decimal detector, reproducible persistence, bidirectional evaluation, rejection telemetry, API/CLI operations, and dashboard read model are implemented.
+
 **Goal:** detect and persist cross-venue price differences without claiming executability.
 
 Tasks:

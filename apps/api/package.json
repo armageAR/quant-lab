@@ -18,6 +18,7 @@
     "@quant-lab/market-catalog": "workspace:*",
     "@quant-lab/market-ingestion": "workspace:*",
     "@quant-lab/shared": "workspace:*",
+    "@quant-lab/strategy-engine": "workspace:*",
     "dotenv": "^17.2.3",
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",

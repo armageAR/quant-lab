@@ -2,6 +2,7 @@
   --ink: #17211b;
   --paper: #f2efe4;
   --signal: #e8542f;
+  --muted: #667069;
   --grid: rgba(23, 33, 27, 0.12);
   --font-sans: 'Avenir Next', 'Century Gothic', sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
@@ -38,6 +39,31 @@ footer {
     600 12px var(--font-mono),
     monospace;
   letter-spacing: 0.12em;
+}
+
+.compact {
+  padding-bottom: 2rem;
+}
+.opportunity-list small {
+  color: var(--muted);
+  font-family: monospace;
+}
+.badge.observed {
+  background: var(--signal);
+  color: var(--ink);
+}
+.badge.rejected {
+  opacity: 0.65;
+}
+a.phase {
+  text-decoration: none;
+}
+.research-link {
+  margin: 1.5rem 0 3rem;
+}
+.research-link a {
+  color: var(--signal);
+  font-weight: 700;
 }
 .phase,
 .badge {

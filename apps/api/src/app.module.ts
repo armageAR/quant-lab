@@ -4,12 +4,14 @@ import { MarketCatalog } from '@quant-lab/market-catalog';
 import {
   HistoricalDatasetService,
   MarketEventStore,
+  ObservedOpportunityService,
 } from '@quant-lab/market-ingestion';
 import type { ApplicationMetrics } from '@quant-lab/shared';
 
 import { HealthController } from './health.controller';
 import { DatasetsController } from './datasets.controller';
 import { MetricsController } from './metrics.controller';
+import { OpportunitiesController } from './opportunities.controller';
 import { MarketsController } from './markets.controller';
 import {
   DATABASE,
@@ -17,6 +19,7 @@ import {
   MARKET_CATALOG,
   MARKET_EVENTS,
   METRICS,
+  OPPORTUNITIES,
 } from './tokens';
 
 @Module({})
@@ -32,6 +35,7 @@ export class AppModule {
         MetricsController,
         MarketsController,
         DatasetsController,
+        OpportunitiesController,
       ],
       providers: [
         { provide: DATABASE, useValue: database },
@@ -47,6 +51,10 @@ export class AppModule {
         {
           provide: DATASETS,
           useValue: new HistoricalDatasetService(database.client),
+        },
+        {
+          provide: OPPORTUNITIES,
+          useValue: new ObservedOpportunityService(database.client),
         },
       ],
     };

@@ -33,7 +33,12 @@ async function ingest(): Promise<void> {
     for (const provider of providers) {
       await store.storeClockDrift(await provider.getClockDrift());
       const markets = await database.client.market.findMany({
-        where: { venueId: provider.venue.id, status: 'active', spot: true },
+        where: {
+          venueId: provider.venue.id,
+          status: 'active',
+          spot: true,
+          instrument: { canonicalSymbol: { in: config.EXCHANGE_MARKETS } },
+        },
       });
       for (const market of markets) {
         if (await store.storeTicker(await provider.fetchTicker(market.id)))

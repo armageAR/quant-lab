@@ -31,6 +31,9 @@ export default function Home() {
           </article>
         ))}
       </section>
+      <p className="research-link">
+        <a href="/opportunities">Inspect observed cross-venue opportunities</a>
+      </p>
       <footer>
         <span>LIVE EXECUTION</span>
         <strong>{liveExecutionStatus}</strong>
