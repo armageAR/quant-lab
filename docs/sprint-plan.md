@@ -328,6 +328,8 @@ Acceptance:
 
 ### Sprint 3.3: Latency study and research dashboard
 
+**Status:** complete on branch `agent/sprint-3-3-latency-research`. A deterministic `@quant-lab/analytics` research report quantifies false-positive rate, gross-to-net attribution, executable episode duration and latency removal, feed quality, per-symbol/direction and daily distributions, and a backtest-eligibility gate. It is reproducible from a dataset manifest and delivered through `/research/report` with CSV export, the `research:report` command, and a dashboard research panel. Covered by unit and PostgreSQL integration tests.
+
 **Goal:** determine whether detected edges survive realistic delays.
 
 Tasks:

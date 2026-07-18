@@ -62,7 +62,7 @@ Completion indicators:
 
 ## Phase 3: Arbitrage research
 
-Status: in progress. Sprints 3.1 and 3.1.1 (observed detection and the continuous observation worker) and Sprint 3.2 (executable opportunity model with fees, depth, venue rules, and inventory) are complete. Sprint 3.3 (latency study and research dashboard reports) remains.
+Status: complete. Sprints 3.1 and 3.1.1 (observed detection and the continuous observation worker), Sprint 3.2 (executable opportunity model with fees, depth, venue rules, and inventory), and Sprint 3.3 (latency study, research report, and dashboard) are done.
 
 Scope:
 - cross-exchange market comparison;
