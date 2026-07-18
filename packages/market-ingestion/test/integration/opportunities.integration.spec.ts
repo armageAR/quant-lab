@@ -110,6 +110,23 @@ describe('ObservedOpportunityService integration', () => {
       rows.every((row) => row.classification !== ('executable' as string)),
     ).toBe(true);
   });
+
+  it('does not evaluate active instruments outside the configured allowlist', async () => {
+    const service = new ObservedOpportunityService(database.client);
+    const results = await service.evaluateAll(
+      {
+        id: 'integration-observed-allowlist',
+        version: '1.0.0',
+        maximumBookAgeMs: 1000,
+        maximumCrossVenueSkewMs: 100,
+        minimumObservedSpread: '0',
+      },
+      new Date('2026-07-18T00:00:00.050Z'),
+      ['OTHER/USD'],
+    );
+
+    expect(results).toEqual([]);
+  });
 });
 
 function snapshot(

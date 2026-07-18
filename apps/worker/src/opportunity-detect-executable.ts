@@ -1,4 +1,5 @@
 import { DatabaseLifecycle } from '@quant-lab/database';
+import { loadConnectivityConfig } from '@quant-lab/exchange-adapters';
 import { ExecutableOpportunityService } from '@quant-lab/market-ingestion';
 import { runMain } from '@quant-lab/shared';
 import { config as loadEnvironment } from 'dotenv';
@@ -9,6 +10,7 @@ import { buildExecutableDetectorConfig, loadWorkerConfig } from './config';
 async function main(): Promise<void> {
   loadEnvironment({ path: resolve(process.cwd(), '../../.env'), quiet: true });
   const config = loadWorkerConfig();
+  const connectivity = loadConnectivityConfig(process.env);
   const detector = buildExecutableDetectorConfig(config);
   const database = new DatabaseLifecycle();
   await database.connect();
@@ -16,7 +18,7 @@ async function main(): Promise<void> {
     const results = await new ExecutableOpportunityService(
       database.client,
       config.OBSERVATION_ORDER_BOOK_DEPTH,
-    ).evaluateAll(detector);
+    ).evaluateAll(detector, new Date(), connectivity.EXCHANGE_MARKETS);
     const count = (classification: string) =>
       results.filter((result) => result.classification === classification)
         .length;

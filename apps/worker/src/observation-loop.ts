@@ -155,6 +155,7 @@ export class ObservationLoop {
     const results = await this.opportunities.evaluateAll(
       this.config.detector,
       new Date(),
+      this.config.markets,
     );
     this.#status.cycles += 1;
     this.#status.consecutiveFailures = 0;
@@ -170,6 +171,7 @@ export class ObservationLoop {
         const executableResults = await this.executable.service.evaluateAll(
           this.executable.detector,
           new Date(),
+          this.config.markets,
         );
         this.#status.executableEvaluations = executableResults.length;
         this.#status.executable = executableResults.filter(

@@ -171,6 +171,17 @@ describe('ExecutableOpportunityService integration', () => {
     );
     expect(new Set(keys).size).toBe(keys.length);
   });
+
+  it('does not evaluate active instruments outside the configured allowlist', async () => {
+    const service = new ExecutableOpportunityService(database.client);
+    const results = await service.evaluateAll(
+      detectorConfig,
+      new Date('2026-07-18T00:00:00.070Z'),
+      ['OTHER/USD'],
+    );
+
+    expect(results).toEqual([]);
+  });
 });
 
 function snapshot(

@@ -79,10 +79,14 @@ export class ExecutableOpportunityService {
   async evaluateAll(
     config: ExecutableDetectorConfig,
     evaluatedAt = new Date(),
+    canonicalSymbols?: readonly string[],
   ): Promise<readonly ExecutableOpportunityResult[]> {
     const configuration = await this.configuration(config);
     const instruments = await this.database.instrument.findMany({
       where: {
+        ...(canonicalSymbols
+          ? { canonicalSymbol: { in: [...canonicalSymbols] } }
+          : {}),
         markets: {
           some: {
             venueId: { in: ['BINANCE', 'KRAKEN'] },

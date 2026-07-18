@@ -38,10 +38,17 @@ export class ObservedOpportunityService {
     this.#store = new MarketEventStore(database);
   }
 
-  async evaluateAll(config: ObservedDetectorConfig, evaluatedAt = new Date()) {
+  async evaluateAll(
+    config: ObservedDetectorConfig,
+    evaluatedAt = new Date(),
+    canonicalSymbols?: readonly string[],
+  ) {
     const configuration = await this.configuration(config);
     const instruments = await this.database.instrument.findMany({
       where: {
+        ...(canonicalSymbols
+          ? { canonicalSymbol: { in: [...canonicalSymbols] } }
+          : {}),
         markets: {
           some: {
             venueId: { in: ['BINANCE', 'KRAKEN'] },
