@@ -8,6 +8,7 @@ The documentation is intentionally written in English so it can serve as stable 
 - [Vision](./vision.md): problem statement, goals, users, and product direction
 - [Roadmap](./roadmap.md): delivery phases and acceptance criteria
 - [Sprint Plan](./sprint-plan.md): executable solo-development plan and project review
+- [Backtest Operations UI Plan](./backtest-operations-ui-plan.md): Sprint 4.4 web workflow tasks and acceptance criteria
 - [Phase 2 Readiness Plan](./phase-2-readiness-plan.md): audited Phase 1 gaps and remediation tasks
 - [Phase 1 Completion](./phase-1-completion.md): quality-gate and completion evidence
 - [Project Principles](./project-principles.md): architecture, research, and execution guardrails

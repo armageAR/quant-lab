@@ -159,6 +159,7 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
         cycles: 0,
         consecutiveFailures: 0,
         orderBooks: 0,
+        orderBookFailures: 0,
         evaluations: 0,
         observed: 0,
         rejected: 0,
