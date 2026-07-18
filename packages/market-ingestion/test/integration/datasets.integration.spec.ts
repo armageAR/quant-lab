@@ -18,6 +18,8 @@ describe('HistoricalDatasetService integration', () => {
     await database.client.datasetEvent.deleteMany();
     await database.client.datasetMarket.deleteMany();
     await database.client.datasetManifest.deleteMany();
+    await database.client.observedOpportunity.deleteMany();
+    await database.client.detectorConfiguration.deleteMany();
     await database.client.marketTicker.deleteMany({ where: { marketId } });
     await database.client.rawMarketEnvelope.deleteMany({ where: { marketId } });
     await database.client.market.deleteMany({ where: { id: marketId } });

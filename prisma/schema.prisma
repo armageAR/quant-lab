@@ -146,10 +146,52 @@ model MarketOrderBookEvent {
   depth            Int
   rawEnvelopeId    String   @db.Uuid
   market           Market   @relation(fields: [marketId], references: [id])
+  opportunitiesAsBuy ObservedOpportunity[] @relation("OpportunityBuyBook")
+  opportunitiesAsSell ObservedOpportunity[] @relation("OpportunitySellBook")
 
   @@unique([marketId, sequence, kind])
   @@index([marketId, eventTime, id])
   @@index([marketId, kind, processedAt])
+}
+
+model DetectorConfiguration {
+  id           String   @id
+  detectorId   String
+  version      String
+  fingerprint  String   @unique
+  configuration Json
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  opportunities ObservedOpportunity[]
+
+  @@unique([detectorId, version, fingerprint])
+}
+
+model ObservedOpportunity {
+  id                  String   @id @default(uuid()) @db.Uuid
+  idempotencyKey      String   @unique
+  configurationId     String
+  canonicalSymbol     String
+  classification      String
+  direction           String
+  buyMarketId         String
+  sellMarketId        String
+  buyBookEventId      String   @db.Uuid
+  sellBookEventId     String   @db.Uuid
+  buyPrice             Decimal? @db.Decimal(38, 18)
+  sellPrice            Decimal? @db.Decimal(38, 18)
+  observedSpread       Decimal? @db.Decimal(38, 18)
+  buyFreshnessMs       Int
+  sellFreshnessMs      Int
+  crossVenueSkewMs     Int
+  rejectionReason      String?
+  evaluatedAt          DateTime @db.Timestamptz(6)
+  configuration        DetectorConfiguration @relation(fields: [configurationId], references: [id])
+  buyBook              MarketOrderBookEvent @relation("OpportunityBuyBook", fields: [buyBookEventId], references: [id])
+  sellBook             MarketOrderBookEvent @relation("OpportunitySellBook", fields: [sellBookEventId], references: [id])
+
+  @@index([canonicalSymbol, evaluatedAt])
+  @@index([classification, evaluatedAt])
+  @@index([rejectionReason, evaluatedAt])
 }
 
 model OrderBookInvalidation {

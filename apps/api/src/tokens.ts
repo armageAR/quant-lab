@@ -3,3 +3,4 @@ export const METRICS = Symbol('METRICS');
 export const MARKET_CATALOG = Symbol('MARKET_CATALOG');
 export const MARKET_EVENTS = Symbol('MARKET_EVENTS');
 export const DATASETS = Symbol('DATASETS');
+export const OPPORTUNITIES = Symbol('OPPORTUNITIES');

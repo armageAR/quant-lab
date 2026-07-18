@@ -117,6 +117,8 @@ describe('MarketCatalog integration', () => {
     await database.client.datasetEvent.deleteMany();
     await database.client.datasetMarket.deleteMany();
     await database.client.datasetManifest.deleteMany();
+    await database.client.observedOpportunity.deleteMany();
+    await database.client.detectorConfiguration.deleteMany();
     await database.client.marketTicker.deleteMany();
     await database.client.marketTrade.deleteMany();
     await database.client.marketCandle.deleteMany();

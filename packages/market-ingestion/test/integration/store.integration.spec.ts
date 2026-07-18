@@ -18,6 +18,8 @@ describe('MarketEventStore integration', () => {
     await db.client.datasetEvent.deleteMany();
     await db.client.datasetMarket.deleteMany();
     await db.client.datasetManifest.deleteMany();
+    await db.client.observedOpportunity.deleteMany();
+    await db.client.detectorConfiguration.deleteMany();
     await db.client.orderBookInvalidation.deleteMany();
     await db.client.marketOrderBookEvent.deleteMany();
     await db.client.marketTicker.deleteMany();

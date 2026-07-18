@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "turbo dev --concurrency 20",
     "lint": "turbo lint",
     "test": "turbo test",
     "test:integration": "pnpm --filter @quant-lab/database test:integration && pnpm --filter @quant-lab/market-catalog test:integration && pnpm --filter @quant-lab/market-ingestion test:integration",
@@ -20,6 +20,7 @@
     "market:stream": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker market:stream",
     "market:retain": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker market:retain",
     "dataset": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker dataset",
+    "opportunity:detect": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker opportunity:detect",
     "typecheck": "turbo typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
