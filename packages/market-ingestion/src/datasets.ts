@@ -43,6 +43,16 @@ export interface DatasetManifestView {
   marketIds: readonly string[];
 }
 
+export interface ListDatasetsInput {
+  limit?: number;
+  cursor?: string;
+  marketId?: string;
+  pinned?: boolean;
+  validated?: boolean;
+  from?: Date;
+  to?: Date;
+}
+
 export interface FrozenDatasetEvent {
   ordinal: number;
   eventType: string;
@@ -160,6 +170,32 @@ export class HistoricalDatasetService {
       include: { markets: { orderBy: { marketId: 'asc' } } },
     });
     return this.view(manifest);
+  }
+
+  async list(
+    input: ListDatasetsInput = {},
+  ): Promise<readonly DatasetManifestView[]> {
+    const limit = Math.max(1, Math.min(input.limit ?? 100, 200));
+    const rows = await this.database.datasetManifest.findMany({
+      where: {
+        ...(input.marketId
+          ? { markets: { some: { marketId: input.marketId } } }
+          : {}),
+        ...(input.pinned === undefined
+          ? {}
+          : { pinnedAt: input.pinned ? { not: null } : null }),
+        ...(input.validated === undefined
+          ? {}
+          : { validatedAt: input.validated ? { not: null } : null }),
+        ...(input.from ? { from: { gte: input.from } } : {}),
+        ...(input.to ? { to: { lte: input.to } } : {}),
+      },
+      include: { markets: { orderBy: { marketId: 'asc' } } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+      take: limit,
+    });
+    return rows.map((row) => this.view(row));
   }
 
   async events(

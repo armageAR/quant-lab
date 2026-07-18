@@ -1,5 +1,12 @@
 # Backtest operations UI plan
 
+**Status:** completed on 2026-07-18.
+
+The delivered `/backtests` workspace covers dataset preparation, experiments,
+single runs, three-scenario sweeps, queue controls, polling, result inspection,
+comparison, and CSV export through a same-origin BFF. Live execution and AI
+selection remain out of scope.
+
 ## Purpose
 
 Deliver a complete web workflow for creating, operating, comparing, and exporting deterministic backtests without requiring `curl`, direct database access, or terminal commands. This is Sprint 4.4, after the simulation engine and before paper trading.
