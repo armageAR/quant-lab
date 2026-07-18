@@ -1,5 +1,5 @@
 {
-  "name": "@quant-lab/analytics",
+  "name": "@quant-lab/simulation",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
@@ -13,8 +13,6 @@
   },
   "dependencies": {
     "@quant-lab/database": "workspace:*",
-    "@quant-lab/market-ingestion": "workspace:*",
-    "@quant-lab/simulation": "workspace:*",
     "decimal.js": "^10.6.0"
   },
   "devDependencies": {

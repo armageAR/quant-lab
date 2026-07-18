@@ -78,6 +78,67 @@ a.phase {
   color: var(--signal);
   font-weight: 700;
 }
+.backtest-hero {
+  padding: clamp(48px, 9vh, 100px) 0 48px;
+  max-width: 1000px;
+  animation: enter 0.7s ease-out both;
+}
+.backtest-hero h1 {
+  font-size: clamp(58px, 9vw, 124px);
+}
+.backtest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+  border-top: 2px solid var(--ink);
+  padding-top: 18px;
+}
+.backtest-card {
+  display: block;
+  padding: 22px;
+  border: 1px solid var(--ink);
+  background: color-mix(in srgb, var(--paper) 92%, white);
+}
+.backtest-card-head,
+.metric-strip {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.backtest-card h2 {
+  margin-top: 28px;
+  overflow-wrap: anywhere;
+}
+.metric-strip {
+  margin: 22px 0;
+  padding: 12px 0;
+  border-block: 1px solid var(--grid);
+  flex-wrap: wrap;
+  font:
+    700 11px var(--font-mono),
+    monospace;
+}
+.backtest-card summary {
+  cursor: pointer;
+  color: var(--signal);
+  font:
+    700 11px var(--font-mono),
+    monospace;
+  text-transform: uppercase;
+}
+.backtest-card pre {
+  max-height: 240px;
+  overflow: auto;
+  padding: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 10px;
+}
+.gate-copy {
+  margin-top: 18px;
+  color: var(--signal);
+  font-weight: 700;
+}
 .phase,
 .badge {
   color: var(--signal);
@@ -160,6 +221,12 @@ footer strong {
   }
   article {
     grid-template-columns: 34px 1fr;
+  }
+  .backtest-grid {
+    grid-template-columns: 1fr;
+  }
+  .backtest-card {
+    display: block;
   }
   .badge {
     grid-column: 2;

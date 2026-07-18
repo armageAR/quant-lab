@@ -47,6 +47,7 @@ The documentation is intentionally written in English so it can serve as stable 
 - [Order-book reconstruction](./order-books.md)
 - [Historical datasets](./historical-datasets.md)
 - [Research report and latency study](./research-report.md)
+- [Backtesting and simulation](./backtesting.md)
 
 ## Operations
 

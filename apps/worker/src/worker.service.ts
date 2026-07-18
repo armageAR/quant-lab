@@ -18,6 +18,10 @@ import {
   ObservedOpportunityService,
 } from '@quant-lab/market-ingestion';
 import type { Logger } from 'pino';
+import {
+  BacktestRunService,
+  executeArbitrageBacktest,
+} from '@quant-lab/simulation';
 
 import { buildExecutableDetectorConfig, type WorkerConfig } from './config';
 import { ObservationLoop, type ObservationStatus } from './observation-loop';
@@ -37,6 +41,9 @@ export interface WorkerObservationStatus extends ObservationStatus {
 export class WorkerService implements OnModuleInit, OnModuleDestroy {
   readonly #providers: CcxtReadOnlyExchangeAdapter[] = [];
   #loop?: ObservationLoop;
+  #backtestTimer?: NodeJS.Timeout;
+  #backtestExecution?: Promise<void>;
+  #stopping = false;
 
   constructor(
     @Inject(WORKER_LOGGER) private readonly logger: Logger,
@@ -108,11 +115,38 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
       { observationEnabled: Boolean(this.#loop) },
       'Worker ready',
     );
+    const backtests = new BacktestRunService(this.database.client);
+    const poll = () => {
+      if (this.#stopping || this.#backtestExecution) return;
+      this.#backtestExecution = backtests
+        .executeNext((run, events, control) =>
+          executeArbitrageBacktest(run, events, {
+            checkpoint: (processed, total) =>
+              control.checkpoint(processed, total),
+          }),
+        )
+        .then(() => undefined)
+        .catch((error: unknown) =>
+          this.logger.error({ err: error }, 'Backtest queue poll failed'),
+        )
+        .finally(() => {
+          this.#backtestExecution = undefined;
+        });
+    };
+    this.#backtestTimer = setInterval(
+      poll,
+      this.config.BACKTEST_POLL_INTERVAL_MS,
+    );
+    this.#backtestTimer.unref();
+    poll();
   }
 
   async onModuleDestroy(): Promise<void> {
     this.metrics.workerReady.set(0);
+    this.#stopping = true;
+    if (this.#backtestTimer) clearInterval(this.#backtestTimer);
     this.logger.info('Worker stopped accepting operations');
+    await this.#backtestExecution;
     await this.#loop?.stop();
     await Promise.all(this.#providers.map((provider) => provider.close()));
   }
