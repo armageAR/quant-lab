@@ -1,6 +1,10 @@
 # IBKR
 
-Interactive Brokers is future scope, not an initial venue. It is important to document now because its model is materially different from crypto exchanges and it should influence the architecture from the start.
+Interactive Brokers is planned after the Phase 6 strategy foundation. The first
+scope is US-listed stocks and ETFs using real data, local paper trading, and the
+IBKR paper simulator. See the
+[IBKR paper-trading plan](../ibkr-paper-trading-plan.md). ADRs, Argentine markets,
+and live orders remain deferred.
 
 ## Why it is future scope
 

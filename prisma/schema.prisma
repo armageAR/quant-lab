@@ -542,3 +542,25 @@ model CapabilitySnapshot {
   @@unique([venueId, fingerprint])
   @@index([venueId, observedAt])
 }
+
+model StrategyDefinition {
+  id          String            @id
+  name        String
+  description String
+  createdAt   DateTime          @default(now()) @db.Timestamptz(6)
+  versions    StrategyVersion[]
+}
+
+model StrategyVersion {
+  id                  String             @id @default(uuid()) @db.Uuid
+  strategyId          String
+  version             String
+  commitSha           String
+  configurationSchema Json
+  requirements        Json
+  createdAt           DateTime           @default(now()) @db.Timestamptz(6)
+  strategy            StrategyDefinition @relation(fields: [strategyId], references: [id])
+
+  @@unique([strategyId, version])
+  @@index([strategyId, createdAt])
+}

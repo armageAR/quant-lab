@@ -497,6 +497,8 @@ Acceptance:
 
 ### Sprint 6.1: Versioned strategy plugin lifecycle
 
+**Status:** complete on branch `agent/phase-6-strategy-ibkr`.
+
 **Goal:** generalize the minimal detector contract without rewriting arbitrage logic.
 
 Tasks:
@@ -530,6 +532,25 @@ Acceptance:
 - Portfolio rules can reduce or reject strategy intent before execution.
 - Every run is attributable to strategy version, parameters, dataset/feed, and source commit.
 - Phase 6 completion indicators are satisfied without introducing live execution.
+
+### Sprints 6.3-6.6: IBKR stocks and ETFs paper trading
+
+**Goal:** add session-based US stocks and ETFs through IBKR without changing the
+existing crypto workflows or enabling live execution.
+
+The executable task breakdown, acceptance criteria, safety gates, configuration,
+and operator prerequisites are maintained in the
+[IBKR paper-trading plan](./ibkr-paper-trading-plan.md).
+
+Delivery order:
+
+1. Sprint 6.3: paper connectivity and contract catalog.
+2. Sprint 6.4: session-aware market-data ingestion.
+3. Sprint 6.5: stocks/ETFs backtest and local paper trading.
+4. Sprint 6.6: IBKR paper routing and reconciliation campaign.
+
+ADRs, CEDEARs, BYMA, Argentine brokers, and live IBKR orders are explicitly
+deferred.
 
 ## Phase 7: Controlled live execution
 

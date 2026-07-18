@@ -1,6 +1,7 @@
 import type { DatabaseClient } from '@quant-lab/database';
 import {
-  ObservedArbitrageDetector,
+  StrategyRegistry,
+  createObservedArbitragePlugin,
   type ObservedBookInput,
   type ObservedDetectorConfig,
   type ObservedOpportunityResult,
@@ -68,7 +69,13 @@ export class ObservedOpportunityService {
         },
       },
     });
-    const detector = new ObservedArbitrageDetector(config);
+    const registry = new StrategyRegistry();
+    registry.register(
+      createObservedArbitragePlugin({
+        version: config.version,
+        commitSha: `detector:${config.id}`,
+      }),
+    );
     const results: ObservedOpportunityResult[] = [];
     for (const instrument of instruments) {
       const binance = instrument.markets.find(
@@ -87,12 +94,40 @@ export class ObservedOpportunityService {
         [binanceBook, krakenBook],
         [krakenBook, binanceBook],
       ] as const) {
-        const result = detector.evaluate(
-          instrument.canonicalSymbol,
-          buy,
-          sell,
-          evaluatedAt,
-        );
+        const result = await registry.run<
+          {
+            maximumBookAgeMs: number;
+            maximumCrossVenueSkewMs: number;
+            minimumObservedSpread: string;
+          },
+          {
+            canonicalSymbol: string;
+            buy: ObservedBookInput;
+            sell: ObservedBookInput;
+            evaluatedAt: Date;
+          },
+          ObservedOpportunityResult
+        >({
+          id: 'cross-venue-observed',
+          version: config.version,
+          configuration: {
+            maximumBookAgeMs: config.maximumBookAgeMs,
+            maximumCrossVenueSkewMs: config.maximumCrossVenueSkewMs,
+            minimumObservedSpread: config.minimumObservedSpread,
+          },
+          event: {
+            canonicalSymbol: instrument.canonicalSymbol,
+            buy,
+            sell,
+            evaluatedAt,
+          },
+          context: {
+            runId: configuration.id,
+            capabilities: new Set(['order-book']),
+            assetClasses: new Set(['spot']),
+            marketIds: [buy.marketId, sell.marketId],
+          },
+        });
         await this.persist(configuration.id, result, evaluatedAt);
         results.push(result);
       }

@@ -10,6 +10,7 @@ The documentation is intentionally written in English so it can serve as stable 
 - [Sprint Plan](./sprint-plan.md): executable solo-development plan and project review
 - [Backtest Operations UI Plan](./backtest-operations-ui-plan.md): Sprint 4.4 web workflow tasks and acceptance criteria
 - [Paper Trading](./paper-trading.md): Phase 5 accounting, risk, lifecycle, validation campaign, and incident procedure
+- [IBKR Paper Trading Plan](./ibkr-paper-trading-plan.md): stocks/ETFs data, backtest, local paper, and IBKR paper delivery plan
 - [Phase 2 Readiness Plan](./phase-2-readiness-plan.md): audited Phase 1 gaps and remediation tasks
 - [Phase 1 Completion](./phase-1-completion.md): quality-gate and completion evidence
 - [Project Principles](./project-principles.md): architecture, research, and execution guardrails

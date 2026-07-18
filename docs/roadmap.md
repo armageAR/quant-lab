@@ -137,6 +137,9 @@ Completion indicators:
 - configuration is schema-validated;
 - experiments can be traced back to a strategy version and commit SHA;
 - portfolio rules can constrain signals before execution.
+- IBKR stocks/ETFs can progress through contract discovery, session-aware data,
+  backtest, local paper trading, and a reconciled IBKR paper campaign as defined
+  in the [IBKR paper-trading plan](./ibkr-paper-trading-plan.md).
 
 ## Phase 7: Controlled live execution
 
