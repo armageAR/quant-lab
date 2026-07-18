@@ -551,6 +551,8 @@ Delivery order:
 3. Sprint 6.5: stocks/ETFs backtest and local paper trading.
 4. Sprint 6.6: IBKR paper routing and reconciliation campaign.
 
+**Sprint 6.3 status:** complete on branch `agent/phase-6-strategy-ibkr`.
+
 ADRs, CEDEARs, BYMA, Argentine brokers, and live IBKR orders are explicitly
 deferred.
 

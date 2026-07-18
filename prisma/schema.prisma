@@ -615,3 +615,24 @@ model StrategyRunAuditEvent {
 
   @@index([strategyRunId, createdAt])
 }
+
+model IbkrContractVersion {
+  id              String   @id @default(uuid()) @db.Uuid
+  conId           String
+  fingerprint     String   @unique
+  symbol          String
+  securityType    String
+  currency        String
+  exchange        String
+  primaryExchange String
+  localSymbol     String
+  minimumTick     Decimal  @db.Decimal(38, 18)
+  timeZoneId      String
+  tradingHours    String
+  liquidHours     String
+  longName        String
+  observedAt      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([conId, fingerprint])
+  @@index([conId, observedAt])
+}

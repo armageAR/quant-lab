@@ -16,6 +16,7 @@
     "@nestjs/platform-express": "^11.1.11",
     "@quant-lab/analytics": "workspace:*",
     "@quant-lab/database": "workspace:*",
+    "@quant-lab/ibkr-adapter": "workspace:*",
     "@quant-lab/market-catalog": "workspace:*",
     "@quant-lab/market-ingestion": "workspace:*",
     "@quant-lab/paper-trading": "workspace:*",

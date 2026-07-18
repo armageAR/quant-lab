@@ -7,6 +7,7 @@
     "node": ">=20.19.0"
   },
   "scripts": {
+    "ibkr:check": "turbo build --filter=@quant-lab/ibkr-adapter && pnpm --filter @quant-lab/ibkr-adapter check",
     "build": "turbo build",
     "dev": "turbo dev --concurrency 20",
     "lint": "turbo lint",

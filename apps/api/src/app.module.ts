@@ -27,6 +27,8 @@ import { BacktestsController } from './backtests.controller';
 import { PaperTradingController } from './paper-trading.controller';
 import { StrategyRunsController } from './strategy-runs.controller';
 import { StrategyRunsService } from './strategy-runs.service';
+import { IbkrController } from './ibkr.controller';
+import { IbkrService } from './ibkr.service';
 import {
   DATABASE,
   DATASETS,
@@ -40,6 +42,7 @@ import {
   BACKTEST_ANALYTICS,
   PAPER_TRADING,
   STRATEGY_RUNS,
+  IBKR,
 } from './tokens';
 
 @Module({})
@@ -61,6 +64,7 @@ export class AppModule {
         BacktestsController,
         PaperTradingController,
         StrategyRunsController,
+        IbkrController,
       ],
       providers: [
         { provide: DATABASE, useValue: database },
@@ -108,6 +112,7 @@ export class AppModule {
           provide: STRATEGY_RUNS,
           useValue: new StrategyRunsService(database.client),
         },
+        { provide: IBKR, useValue: new IbkrService(database.client) },
       ],
     };
   }

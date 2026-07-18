@@ -9,3 +9,4 @@ Use this folder for architecture and product decisions that need a durable recor
 - [ADR 002: Crypto-first, multi-market domain](./ADR-002-crypto-first-multi-market.md)
 - [ADR 003: Decimal and numeric precision](./ADR-003-decimal-numeric-precision.md)
 - [ADR 004: Time and clock model](./ADR-004-time-and-clock-model.md)
+- [ADR 005: IBKR paper gateway integration](./ADR-005-ibkr-paper-gateway.md)
