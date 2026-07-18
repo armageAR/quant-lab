@@ -22,6 +22,7 @@ import {
   BacktestRunService,
   executeArbitrageBacktest,
 } from '@quant-lab/simulation';
+import { PaperTradingService } from '@quant-lab/paper-trading';
 
 import { buildExecutableDetectorConfig, type WorkerConfig } from './config';
 import { ObservationLoop, type ObservationStatus } from './observation-loop';
@@ -43,6 +44,8 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
   #loop?: ObservationLoop;
   #backtestTimer?: NodeJS.Timeout;
   #backtestExecution?: Promise<void>;
+  #paperTimer?: NodeJS.Timeout;
+  #paperExecution?: Promise<void>;
   #stopping = false;
 
   constructor(
@@ -139,16 +142,65 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
     );
     this.#backtestTimer.unref();
     poll();
+    if (this.config.PAPER_TRADING_ENABLED) {
+      const paper = new PaperTradingService(this.database.client);
+      const pollPaper = () => {
+        if (this.#stopping || this.#paperExecution) return;
+        this.#paperExecution = this.runPaperCycle(paper)
+          .catch((error: unknown) =>
+            this.logger.error({ err: error }, 'Paper trading poll failed'),
+          )
+          .finally(() => {
+            this.#paperExecution = undefined;
+          });
+      };
+      this.#paperTimer = setInterval(
+        pollPaper,
+        this.config.PAPER_TRADING_POLL_INTERVAL_MS,
+      );
+      this.#paperTimer.unref();
+      pollPaper();
+    }
   }
 
   async onModuleDestroy(): Promise<void> {
     this.metrics.workerReady.set(0);
     this.#stopping = true;
     if (this.#backtestTimer) clearInterval(this.#backtestTimer);
+    if (this.#paperTimer) clearInterval(this.#paperTimer);
     this.logger.info('Worker stopped accepting operations');
     await this.#backtestExecution;
+    await this.#paperExecution;
     await this.#loop?.stop();
     await Promise.all(this.#providers.map((provider) => provider.close()));
+  }
+
+  private async runPaperCycle(paper: PaperTradingService): Promise<void> {
+    const sessions = await this.database.client.paperSession.findMany({
+      where: { status: 'running' },
+      select: { id: true },
+    });
+    for (const session of sessions) {
+      const executed = await this.database.client.paperOrder.findMany({
+        where: { sessionId: session.id, opportunityId: { not: null } },
+        select: { opportunityId: true },
+      });
+      const opportunity =
+        await this.database.client.executableOpportunity.findFirst({
+          where: {
+            classification: 'executable',
+            id: {
+              notIn: executed.flatMap((item) =>
+                item.opportunityId ? [item.opportunityId] : [],
+              ),
+            },
+          },
+          orderBy: { evaluatedAt: 'asc' },
+          select: { id: true },
+        });
+      if (opportunity)
+        await paper.executeOpportunity(session.id, opportunity.id);
+    }
   }
 
   status(): WorkerObservationStatus {

@@ -107,12 +107,12 @@ model DatasetManifest {
 }
 
 model BacktestExperiment {
-  id          String        @id @default(uuid()) @db.Uuid
-  name        String
-  hypothesis  String
-  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
-  runs        BacktestRun[]
+  id         String        @id @default(uuid()) @db.Uuid
+  name       String
+  hypothesis String
+  createdAt  DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime      @updatedAt @db.Timestamptz(6)
+  runs       BacktestRun[]
 
   @@index([createdAt])
 }
@@ -144,6 +144,128 @@ model BacktestRun {
   @@index([status, createdAt])
   @@index([experimentId, createdAt])
   @@index([datasetId, createdAt])
+}
+
+model PaperSession {
+  id              String          @id @default(uuid()) @db.Uuid
+  name            String
+  status          String
+  strategyVersion String
+  codeCommit      String
+  configuration   Json
+  startedAt       DateTime?       @db.Timestamptz(6)
+  stoppedAt       DateTime?       @db.Timestamptz(6)
+  emergencyAt     DateTime?       @db.Timestamptz(6)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime        @updatedAt @db.Timestamptz(6)
+  accounts        PaperAccount[]
+  orders          PaperOrder[]
+  alerts          PaperAlert[]
+  campaigns       PaperCampaign[]
+
+  @@index([status, createdAt])
+}
+
+model PaperAccount {
+  id        String             @id @default(uuid()) @db.Uuid
+  sessionId String             @db.Uuid
+  venueId   String
+  asset     String
+  available Decimal            @db.Decimal(38, 18)
+  reserved  Decimal            @db.Decimal(38, 18)
+  updatedAt DateTime           @updatedAt @db.Timestamptz(6)
+  session   PaperSession       @relation(fields: [sessionId], references: [id])
+  entries   PaperLedgerEntry[]
+
+  @@unique([sessionId, venueId, asset])
+}
+
+model PaperOrder {
+  id                String       @id @default(uuid()) @db.Uuid
+  sessionId         String       @db.Uuid
+  idempotencyKey    String       @unique
+  correlationId     String
+  opportunityId     String?      @db.Uuid
+  strategyVersion   String
+  venueId           String
+  marketId          String
+  side              String
+  status            String
+  requestedQuantity Decimal      @db.Decimal(38, 18)
+  filledQuantity    Decimal      @default(0) @db.Decimal(38, 18)
+  averagePrice      Decimal?     @db.Decimal(38, 18)
+  expectedProfit    Decimal?     @db.Decimal(38, 18)
+  simulatedProfit   Decimal?     @db.Decimal(38, 18)
+  rejectionReason   String?
+  createdAt         DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime     @updatedAt @db.Timestamptz(6)
+  session           PaperSession @relation(fields: [sessionId], references: [id])
+  fills             PaperFill[]
+
+  @@index([sessionId, createdAt])
+  @@index([status, createdAt])
+}
+
+model PaperFill {
+  id             String             @id @default(uuid()) @db.Uuid
+  orderId        String             @db.Uuid
+  idempotencyKey String             @unique
+  quantity       Decimal            @db.Decimal(38, 18)
+  price          Decimal            @db.Decimal(38, 18)
+  fee            Decimal            @db.Decimal(38, 18)
+  feeAsset       String
+  occurredAt     DateTime           @db.Timestamptz(6)
+  evidence       Json
+  order          PaperOrder         @relation(fields: [orderId], references: [id])
+  entries        PaperLedgerEntry[]
+
+  @@index([orderId, occurredAt])
+}
+
+model PaperLedgerEntry {
+  id        String       @id @default(uuid()) @db.Uuid
+  accountId String       @db.Uuid
+  fillId    String?      @db.Uuid
+  groupId   String
+  amount    Decimal      @db.Decimal(38, 18)
+  reason    String
+  createdAt DateTime     @default(now()) @db.Timestamptz(6)
+  account   PaperAccount @relation(fields: [accountId], references: [id])
+  fill      PaperFill?   @relation(fields: [fillId], references: [id])
+
+  @@index([groupId])
+  @@index([accountId, createdAt])
+}
+
+model PaperAlert {
+  id         String       @id @default(uuid()) @db.Uuid
+  sessionId  String       @db.Uuid
+  severity   String
+  code       String
+  message    String
+  details    Json?
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  resolvedAt DateTime?    @db.Timestamptz(6)
+  session    PaperSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, createdAt])
+}
+
+model PaperCampaign {
+  id                   String       @id @default(uuid()) @db.Uuid
+  sessionId            String       @db.Uuid
+  name                 String
+  status               String
+  minimumDurationHours Int
+  minimumSampleCount   Int
+  startedAt            DateTime?    @db.Timestamptz(6)
+  completedAt          DateTime?    @db.Timestamptz(6)
+  decision             String?
+  report               Json?
+  createdAt            DateTime     @default(now()) @db.Timestamptz(6)
+  session              PaperSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, createdAt])
 }
 
 model DatasetMarket {

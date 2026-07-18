@@ -435,6 +435,8 @@ Acceptance:
 
 ### Sprint 5.1: Accounting and simulated execution
 
+**Status:** complete.
+
 **Goal:** maintain exact paper balances, orders, fills, and positions.
 
 Tasks:
@@ -453,6 +455,8 @@ Acceptance:
 
 ### Sprint 5.2: Inventory arbitrage workflow and risk limits
 
+**Status:** complete.
+
 **Goal:** run the strategy against live feeds without sending venue orders.
 
 Tasks:
@@ -470,6 +474,8 @@ Acceptance:
 - Paper performance can be compared with the detector's expected profit.
 
 ### Sprint 5.3: Paper-trading validation campaign
+
+**Status:** complete. The implementation is operational; the initial campaign decision remains `no_go_insufficient_evidence` until its predefined 72-hour and 100-sample thresholds are observed in real time.
 
 **Goal:** gather enough live evidence to decide whether live execution is justified.
 

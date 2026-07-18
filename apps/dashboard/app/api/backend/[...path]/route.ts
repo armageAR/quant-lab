@@ -1,7 +1,12 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-const ALLOWED_ROOTS = new Set(['backtests', 'datasets', 'markets']);
+const ALLOWED_ROOTS = new Set([
+  'backtests',
+  'datasets',
+  'markets',
+  'paper-trading',
+]);
 
 async function proxy(
   request: NextRequest,

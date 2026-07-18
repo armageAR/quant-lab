@@ -716,6 +716,84 @@ tbody tr:hover {
 .metric-cell {
   font: 700 10px var(--font-mono);
 }
+.button.danger {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+.paper-status {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  gap: 1px;
+}
+.paper-status article {
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  background: var(--panel);
+}
+.paper-status span {
+  color: var(--muted);
+  font: 700 9px var(--font-mono);
+  text-transform: uppercase;
+}
+.paper-status strong {
+  font: 700 18px var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.paper-section {
+  margin-top: 14px;
+}
+.paper-table {
+  min-width: 600px;
+}
+.paper-create {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr auto;
+  gap: 12px;
+  align-items: end;
+}
+.paper-create label {
+  display: grid;
+  gap: 5px;
+  font: 700 9px var(--font-mono);
+  text-transform: uppercase;
+}
+.paper-create input {
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid var(--line);
+}
+.paper-create p {
+  color: var(--muted);
+  font-size: 11px;
+}
+.paper-alert {
+  padding: 10px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+@media (max-width: 900px) {
+  .paper-status {
+    grid-template-columns: 1fr 1fr;
+  }
+  .paper-create {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 600px) {
+  .paper-status,
+  .paper-create {
+    grid-template-columns: 1fr;
+  }
+  .paper-alert {
+    grid-template-columns: 1fr;
+  }
+}
 
 .modal {
   width: min(760px, calc(100vw - 32px));

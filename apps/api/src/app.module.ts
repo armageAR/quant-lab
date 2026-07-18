@@ -14,6 +14,7 @@ import {
 } from '@quant-lab/market-ingestion';
 import type { ApplicationMetrics } from '@quant-lab/shared';
 import { BacktestRunService } from '@quant-lab/simulation';
+import { PaperTradingService } from '@quant-lab/paper-trading';
 
 import { HealthController } from './health.controller';
 import { DatasetsController } from './datasets.controller';
@@ -23,6 +24,7 @@ import { ExecutableOpportunitiesController } from './executable-opportunities.co
 import { ResearchController } from './research.controller';
 import { MarketsController } from './markets.controller';
 import { BacktestsController } from './backtests.controller';
+import { PaperTradingController } from './paper-trading.controller';
 import {
   DATABASE,
   DATASETS,
@@ -34,6 +36,7 @@ import {
   RESEARCH,
   BACKTESTS,
   BACKTEST_ANALYTICS,
+  PAPER_TRADING,
 } from './tokens';
 
 @Module({})
@@ -53,6 +56,7 @@ export class AppModule {
         ExecutableOpportunitiesController,
         ResearchController,
         BacktestsController,
+        PaperTradingController,
       ],
       providers: [
         { provide: DATABASE, useValue: database },
@@ -91,6 +95,10 @@ export class AppModule {
         {
           provide: BACKTEST_ANALYTICS,
           useValue: new BacktestAnalyticsService(database.client),
+        },
+        {
+          provide: PAPER_TRADING,
+          useValue: new PaperTradingService(database.client),
         },
       ],
     };

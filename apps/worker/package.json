@@ -28,6 +28,7 @@
     "@quant-lab/market-ingestion": "workspace:*",
     "@quant-lab/simulation": "workspace:*",
     "@quant-lab/market-data": "workspace:*",
+    "@quant-lab/paper-trading": "workspace:*",
     "@quant-lab/shared": "workspace:*",
     "@quant-lab/strategy-engine": "workspace:*",
     "dotenv": "^17.2.3",

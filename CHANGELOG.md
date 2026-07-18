@@ -8,6 +8,8 @@ All notable changes are recorded here. Quant Lab follows a lightweight Keep a Ch
 
 ### Added
 
+- Phase 5 paper trading with exact-decimal, double-entry-style simulated accounting; idempotent orders and fills; independent venue inventories; persistent lifecycle and emergency stop; explicit risk blocks; live-feed worker processing; dashboard operations; and a predefined, non-promoting validation campaign and incident procedure.
+
 - Sprint 4.4 backtest operations workspace: bounded dataset discovery and
   preparation, experiment creation, exact-decimal run configuration,
   three-scenario sweeps, immutable request review, visibility-aware queue
