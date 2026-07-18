@@ -226,11 +226,11 @@ export class ExecutableOpportunityService {
     const [book, fee, rule] = await Promise.all([
       this.#store.reconstructOrderBook(marketId, at, this.depth),
       this.database.feeScheduleVersion.findFirst({
-        where: { marketId },
+        where: { marketId, effectiveAt: { lte: at } },
         orderBy: { effectiveAt: 'desc' },
       }),
       this.database.tradingRuleVersion.findFirst({
-        where: { marketId },
+        where: { marketId, effectiveAt: { lte: at } },
         orderBy: { effectiveAt: 'desc' },
       }),
     ]);

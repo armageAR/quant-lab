@@ -55,6 +55,10 @@ export function loadWorkerConfig(
   return parseConfig(workerConfigSchema, source);
 }
 
+function isDecimalString(value: string): boolean {
+  return value.length > 0 && /^-?\d+(\.\d+)?$/.test(value);
+}
+
 function parseInventory(raw: string): InventoryConfig {
   let parsed: unknown;
   try {
@@ -71,8 +75,13 @@ function parseInventory(raw: string): InventoryConfig {
     const venueBalances: Record<string, string> = {};
     for (const [currency, amount] of Object.entries(
       balances as Record<string, unknown>,
-    ))
-      venueBalances[currency] = String(amount);
+    )) {
+      if (typeof amount !== 'string' || !isDecimalString(amount))
+        throw new Error(
+          `EXECUTABLE_INVENTORY.${venue}.${currency} must be a decimal string`,
+        );
+      venueBalances[currency] = amount;
+    }
     inventory[venue] = venueBalances;
   }
   return inventory;

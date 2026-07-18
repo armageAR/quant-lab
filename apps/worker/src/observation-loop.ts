@@ -143,17 +143,24 @@ export class ObservationLoop {
     ).length;
     this.#status.rejected = results.length - this.#status.observed;
     if (this.executable) {
-      const executableResults = await this.executable.service.evaluateAll(
-        this.executable.detector,
-        new Date(),
-      );
-      this.#status.executableEvaluations = executableResults.length;
-      this.#status.executable = executableResults.filter(
-        (result) => result.classification === 'executable',
-      ).length;
-      this.#status.missed = executableResults.filter(
-        (result) => result.classification === 'missed',
-      ).length;
+      try {
+        const executableResults = await this.executable.service.evaluateAll(
+          this.executable.detector,
+          new Date(),
+        );
+        this.#status.executableEvaluations = executableResults.length;
+        this.#status.executable = executableResults.filter(
+          (result) => result.classification === 'executable',
+        ).length;
+        this.#status.missed = executableResults.filter(
+          (result) => result.classification === 'missed',
+        ).length;
+      } catch (error) {
+        this.logger.error(
+          { err: error },
+          'Executable evaluation failed',
+        );
+      }
     }
     this.#status.lastCompletedAt = new Date().toISOString();
     this.#status.lastSuccessAt = this.#status.lastCompletedAt;
@@ -182,7 +189,7 @@ export class ObservationLoop {
       this.#status.lastError =
         error instanceof Error ? error.message : 'unknown observation error';
       delay = Math.min(
-        this.config.intervalMs * 2 ** (this.#status.consecutiveFailures - 1),
+        this.config.intervalMs * 2 ** this.#status.consecutiveFailures,
         this.config.maxBackoffMs,
       );
       this.#status.state = 'backoff';
