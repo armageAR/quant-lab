@@ -12,6 +12,7 @@ import {
   ObservedOpportunityService,
 } from '@quant-lab/market-ingestion';
 import type { ApplicationMetrics } from '@quant-lab/shared';
+import { BacktestRunService } from '@quant-lab/simulation';
 
 import { HealthController } from './health.controller';
 import { DatasetsController } from './datasets.controller';
@@ -20,6 +21,7 @@ import { OpportunitiesController } from './opportunities.controller';
 import { ExecutableOpportunitiesController } from './executable-opportunities.controller';
 import { ResearchController } from './research.controller';
 import { MarketsController } from './markets.controller';
+import { BacktestsController } from './backtests.controller';
 import {
   DATABASE,
   DATASETS,
@@ -29,6 +31,7 @@ import {
   METRICS,
   OPPORTUNITIES,
   RESEARCH,
+  BACKTESTS,
 } from './tokens';
 
 @Module({})
@@ -47,6 +50,7 @@ export class AppModule {
         OpportunitiesController,
         ExecutableOpportunitiesController,
         ResearchController,
+        BacktestsController,
       ],
       providers: [
         { provide: DATABASE, useValue: database },
@@ -77,6 +81,10 @@ export class AppModule {
             database.client,
             researchReportConfigFromEnv(),
           ),
+        },
+        {
+          provide: BACKTESTS,
+          useValue: new BacktestRunService(database.client),
         },
       ],
     };

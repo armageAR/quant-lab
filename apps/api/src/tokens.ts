@@ -6,3 +6,4 @@ export const DATASETS = Symbol('DATASETS');
 export const OPPORTUNITIES = Symbol('OPPORTUNITIES');
 export const EXECUTABLE_OPPORTUNITIES = Symbol('EXECUTABLE_OPPORTUNITIES');
 export const RESEARCH = Symbol('RESEARCH');
+export const BACKTESTS = Symbol('BACKTESTS');

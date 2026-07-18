@@ -8,6 +8,7 @@ const workerConfigSchema = baseConfigSchema.extend({
   APP_NAME: z.string().default('quant-lab-worker'),
   DATABASE_URL: z.string().url(),
   WORKER_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).default(3002),
+  BACKTEST_POLL_INTERVAL_MS: z.coerce.number().int().min(250).default(1_000),
   OBSERVATION_LOOP_ENABLED: z
     .enum(['true', 'false'])
     .transform((value) => value === 'true')

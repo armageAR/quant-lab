@@ -100,9 +100,50 @@ model DatasetManifest {
   compactedAt    DateTime?       @db.Timestamptz(6)
   markets        DatasetMarket[]
   events         DatasetEvent[]
+  backtestRuns   BacktestRun[]
 
   @@index([createdAt])
   @@index([pinnedAt])
+}
+
+model BacktestExperiment {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  hypothesis  String
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
+  runs        BacktestRun[]
+
+  @@index([createdAt])
+}
+
+model BacktestRun {
+  id              String             @id @default(uuid()) @db.Uuid
+  experimentId    String             @db.Uuid
+  datasetId       String
+  status          String
+  seed            Int
+  codeCommit      String
+  configuration   Json
+  modelVersions   Json
+  progress        Int                @default(0)
+  totalEvents     Int                @default(0)
+  pauseRequested  Boolean            @default(false)
+  cancelRequested Boolean            @default(false)
+  outputHash      String?
+  metrics         Json?
+  results         Json?
+  error           String?
+  createdAt       DateTime           @default(now()) @db.Timestamptz(6)
+  startedAt       DateTime?          @db.Timestamptz(6)
+  completedAt     DateTime?          @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @db.Timestamptz(6)
+  experiment      BacktestExperiment @relation(fields: [experimentId], references: [id])
+  dataset         DatasetManifest    @relation(fields: [datasetId], references: [id])
+
+  @@index([status, createdAt])
+  @@index([experimentId, createdAt])
+  @@index([datasetId, createdAt])
 }
 
 model DatasetMarket {
