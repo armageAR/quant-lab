@@ -164,7 +164,9 @@ describe('ArbitrageResearchService integration', () => {
         to: new Date('2026-07-18T23:59:59Z'),
         eventCount: 0,
         sourceCoverage: {},
-        markets: { create: [{ marketId: binanceId }] },
+        markets: {
+          create: [{ marketId: binanceId }, { marketId: krakenId }],
+        },
       },
     });
 

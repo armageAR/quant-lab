@@ -14,11 +14,16 @@ function integer(
   return parsed;
 }
 
-function decimalString(value: string | undefined, fallback: string): string {
+function rate(value: string | undefined, fallback: string): string {
   if (value === undefined) return fallback;
   const trimmed = value.trim();
   if (trimmed.length === 0 || !/^-?\d+(\.\d+)?$/.test(trimmed))
     throw new Error(`expected a decimal string, received "${value}"`);
+  const parsed = Number(trimmed);
+  if (parsed < 0 || parsed > 1)
+    throw new Error(
+      `expected a decimal rate between 0 and 1, received "${value}"`,
+    );
   return trimmed;
 }
 
@@ -34,10 +39,7 @@ export function researchReportConfigFromEnv(
     episodeGapMs: integer(env.RESEARCH_EPISODE_GAP_MS, 20_000, 1),
     thresholds: {
       minExecutableCount: integer(env.RESEARCH_MIN_EXECUTABLE_COUNT, 10, 0),
-      maxFalsePositiveRate: decimalString(
-        env.RESEARCH_MAX_FALSE_POSITIVE_RATE,
-        '0.9',
-      ),
+      maxFalsePositiveRate: rate(env.RESEARCH_MAX_FALSE_POSITIVE_RATE, '0.9'),
       minMedianDurationMs: integer(
         env.RESEARCH_MIN_MEDIAN_DURATION_MS,
         1_000,

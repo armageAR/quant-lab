@@ -47,7 +47,12 @@ async function stop(process) {
 }
 
 const api = start('api', { PORT: '43100' });
-const worker = start('worker', { WORKER_HEALTH_PORT: '43102' });
+const worker = start('worker', {
+  EXCHANGE_CONNECTIVITY_ENABLED: 'false',
+  EXECUTABLE_DETECTOR_ENABLED: 'false',
+  OBSERVATION_LOOP_ENABLED: 'false',
+  WORKER_HEALTH_PORT: '43102',
+});
 
 try {
   const apiReady = await waitFor('http://127.0.0.1:43100/health/ready');

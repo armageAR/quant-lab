@@ -16,7 +16,7 @@ export interface ResearchQuery {
   datasetId?: string;
 }
 
-const MAX_RECORDS = 50_000;
+const PAGE_SIZE = 10_000;
 
 interface ResolvedScope {
   where: Record<string, unknown>;
@@ -52,11 +52,17 @@ export class ArbitrageResearchService {
     query: ResearchQuery,
   ): Promise<{ records: ResearchRecord[]; window: ResearchReportWindow }> {
     const scope = await this.scope(query);
-    const rows = await this.database.executableOpportunity.findMany({
-      where: scope.where,
-      orderBy: [{ evaluatedAt: 'asc' }, { id: 'asc' }],
-      take: MAX_RECORDS,
-    });
+    const rows = [];
+    for (let skip = 0; ; skip += PAGE_SIZE) {
+      const page = await this.database.executableOpportunity.findMany({
+        where: scope.where,
+        orderBy: [{ evaluatedAt: 'asc' }, { id: 'asc' }],
+        skip,
+        take: PAGE_SIZE,
+      });
+      rows.push(...page);
+      if (page.length < PAGE_SIZE) break;
+    }
     const records = rows.map((row) => ({
       canonicalSymbol: row.canonicalSymbol,
       direction: row.direction,
@@ -90,10 +96,8 @@ export class ArbitrageResearchService {
       });
       const marketIds = manifest.markets.map((market) => market.marketId);
       where.evaluatedAt = { gte: manifest.from, lte: manifest.to };
-      where.OR = [
-        { buyMarketId: { in: marketIds } },
-        { sellMarketId: { in: marketIds } },
-      ];
+      where.buyMarketId = { in: marketIds };
+      where.sellMarketId = { in: marketIds };
       window.datasetId = manifest.id;
       window.from = manifest.from.toISOString();
       window.to = manifest.to.toISOString();
