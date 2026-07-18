@@ -31,7 +31,13 @@ export class OpportunitiesController {
     if (
       !config.id ||
       !config.version ||
-      typeof config.minimumObservedSpread !== 'string'
+      typeof config.minimumObservedSpread !== 'string' ||
+      typeof config.maximumBookAgeMs !== 'number' ||
+      !Number.isFinite(config.maximumBookAgeMs) ||
+      config.maximumBookAgeMs < 1 ||
+      typeof config.maximumCrossVenueSkewMs !== 'number' ||
+      !Number.isFinite(config.maximumCrossVenueSkewMs) ||
+      config.maximumCrossVenueSkewMs < 0
     )
       throw new BadRequestException('detector configuration is invalid');
     return this.opportunities.evaluateAll(config);

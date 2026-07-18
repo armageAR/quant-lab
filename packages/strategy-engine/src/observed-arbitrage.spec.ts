@@ -28,6 +28,29 @@ const book = (
 });
 
 describe('ObservedArbitrageDetector', () => {
+  it.each([
+    [Number.NaN, 100],
+    [Number.POSITIVE_INFINITY, 100],
+    [0, 100],
+    [1000, Number.NaN],
+    [1000, Number.POSITIVE_INFINITY],
+    [1000, -1],
+  ])(
+    'rejects invalid timing thresholds (%s, %s)',
+    (maximumBookAgeMs, maximumCrossVenueSkewMs) => {
+      expect(
+        () =>
+          new ObservedArbitrageDetector({
+            id: 'cross-venue-observed',
+            version: '1.0.0',
+            maximumBookAgeMs,
+            maximumCrossVenueSkewMs,
+            minimumObservedSpread: '0.001',
+          }),
+      ).toThrow(RangeError);
+    },
+  );
+
   it('detects a positive observed spread without executable classification', () => {
     const result = detector.evaluate(
       'BTC/USDT',

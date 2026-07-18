@@ -49,7 +49,12 @@ export interface ObservedOpportunityResult {
 
 export class ObservedArbitrageDetector {
   constructor(readonly config: ObservedDetectorConfig) {
-    if (config.maximumBookAgeMs < 1 || config.maximumCrossVenueSkewMs < 0)
+    if (
+      !Number.isFinite(config.maximumBookAgeMs) ||
+      config.maximumBookAgeMs < 1 ||
+      !Number.isFinite(config.maximumCrossVenueSkewMs) ||
+      config.maximumCrossVenueSkewMs < 0
+    )
       throw new RangeError('detector timing thresholds are invalid');
     new ExactDecimal(config.minimumObservedSpread);
   }
