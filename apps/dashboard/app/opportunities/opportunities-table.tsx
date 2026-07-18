@@ -33,7 +33,7 @@ const columns: Array<[SortKey, string]> = [
   ['evaluatedAt', 'Fecha y hora'],
   ['symbol', 'Especie'],
   ['direction', 'Operación'],
-  ['source', 'Modelo'],
+  ['source', 'Etapa'],
   ['classification', 'Resultado'],
   ['spread', 'Spread'],
   ['netProfit', 'Neto'],
@@ -55,7 +55,6 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
   const [refreshing, startRefresh] = useTransition();
   const [symbol, setSymbol] = useState('all');
   const [direction, setDirection] = useState('all');
-  const [source, setSource] = useState('all');
   const [classification, setClassification] = useState('all');
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(
@@ -71,7 +70,6 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
   const filtered = rows
     .filter((row) => symbol === 'all' || row.symbol === symbol)
     .filter((row) => direction === 'all' || row.direction === direction)
-    .filter((row) => source === 'all' || row.source === source)
     .filter(
       (row) =>
         classification === 'all' || row.classification === classification,
@@ -96,7 +94,6 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
     setSearch('');
     setSymbol('all');
     setDirection('all');
-    setSource('all');
     setClassification('all');
     setSort({ key: 'evaluatedAt', ascending: false });
   }
@@ -139,17 +136,6 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
             {directions.map((value) => (
               <option key={value}>{value}</option>
             ))}
-          </select>
-        </label>
-        <label>
-          Modelo
-          <select
-            onChange={(event) => setSource(event.target.value)}
-            value={source}
-          >
-            <option value="all">Todos</option>
-            <option value="observed">Observado</option>
-            <option value="executable">Ejecutable</option>
           </select>
         </label>
         <label>
