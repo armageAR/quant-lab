@@ -21,6 +21,7 @@
     "market:retain": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker market:retain",
     "dataset": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker dataset",
     "opportunity:detect": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker opportunity:detect",
+    "opportunity:detect:executable": "turbo build --filter=@quant-lab/worker && pnpm --filter @quant-lab/worker opportunity:detect:executable",
     "typecheck": "turbo typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -57,49 +57,49 @@ model Instrument {
 }
 
 model Market {
-  id           String               @id
-  venueId      String
-  instrumentId String
-  venueSymbol  String
-  status       String
-  spot         Boolean
-  firstSeenAt  DateTime             @db.Timestamptz(6)
-  lastSeenAt   DateTime             @db.Timestamptz(6)
-  createdAt    DateTime             @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime             @updatedAt @db.Timestamptz(6)
-  venue        Venue                @relation(fields: [venueId], references: [id])
-  instrument   Instrument           @relation(fields: [instrumentId], references: [id])
-  aliases      MarketAlias[]
-  tradingRules TradingRuleVersion[]
-  feeSchedules FeeScheduleVersion[]
-  tickers      MarketTicker[]
-  trades       MarketTrade[]
-  candles      MarketCandle[]
-  orderBooks   MarketOrderBookEvent[]
+  id                String                  @id
+  venueId           String
+  instrumentId      String
+  venueSymbol       String
+  status            String
+  spot              Boolean
+  firstSeenAt       DateTime                @db.Timestamptz(6)
+  lastSeenAt        DateTime                @db.Timestamptz(6)
+  createdAt         DateTime                @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime                @updatedAt @db.Timestamptz(6)
+  venue             Venue                   @relation(fields: [venueId], references: [id])
+  instrument        Instrument              @relation(fields: [instrumentId], references: [id])
+  aliases           MarketAlias[]
+  tradingRules      TradingRuleVersion[]
+  feeSchedules      FeeScheduleVersion[]
+  tickers           MarketTicker[]
+  trades            MarketTrade[]
+  candles           MarketCandle[]
+  orderBooks        MarketOrderBookEvent[]
   bookInvalidations OrderBookInvalidation[]
-  datasetMarkets DatasetMarket[]
+  datasetMarkets    DatasetMarket[]
 
   @@unique([venueId, venueSymbol])
   @@index([instrumentId, status, spot])
 }
 
 model DatasetManifest {
-  id            String         @id
-  checksum      String         @unique
-  schemaVersion String
-  from          DateTime       @db.Timestamptz(6)
-  to            DateTime       @db.Timestamptz(6)
-  eventCount    Int
+  id             String          @id
+  checksum       String          @unique
+  schemaVersion  String
+  from           DateTime        @db.Timestamptz(6)
+  to             DateTime        @db.Timestamptz(6)
+  eventCount     Int
   sourceCoverage Json
-  qualityReport Json?
-  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
-  validatedAt   DateTime?      @db.Timestamptz(6)
-  pinnedAt      DateTime?      @db.Timestamptz(6)
-  exportedAt    DateTime?      @db.Timestamptz(6)
-  exportPath    String?
-  compactedAt   DateTime?      @db.Timestamptz(6)
-  markets       DatasetMarket[]
-  events        DatasetEvent[]
+  qualityReport  Json?
+  createdAt      DateTime        @default(now()) @db.Timestamptz(6)
+  validatedAt    DateTime?       @db.Timestamptz(6)
+  pinnedAt       DateTime?       @db.Timestamptz(6)
+  exportedAt     DateTime?       @db.Timestamptz(6)
+  exportPath     String?
+  compactedAt    DateTime?       @db.Timestamptz(6)
+  markets        DatasetMarket[]
+  events         DatasetEvent[]
 
   @@index([createdAt])
   @@index([pinnedAt])
@@ -120,7 +120,7 @@ model DatasetEvent {
   ordinal    Int
   eventType  String
   sourceId   String
-  occurredAt DateTime @db.Timestamptz(6)
+  occurredAt DateTime        @db.Timestamptz(6)
   checksum   String
   manifest   DatasetManifest @relation(fields: [manifestId], references: [id])
 
@@ -130,24 +130,26 @@ model DatasetEvent {
 }
 
 model MarketOrderBookEvent {
-  id               String   @id @default(uuid()) @db.Uuid
-  idempotencyKey   String   @unique
-  marketId         String
-  venueId          String
-  kind             String
-  sequence         String
-  previousSequence String?
-  eventTime        DateTime? @db.Timestamptz(6)
-  receivedAt       DateTime  @db.Timestamptz(6)
-  processedAt      DateTime  @db.Timestamptz(6)
-  bids             Json
-  asks             Json
-  checksum         String?
-  depth            Int
-  rawEnvelopeId    String   @db.Uuid
-  market           Market   @relation(fields: [marketId], references: [id])
-  opportunitiesAsBuy ObservedOpportunity[] @relation("OpportunityBuyBook")
-  opportunitiesAsSell ObservedOpportunity[] @relation("OpportunitySellBook")
+  id                  String                  @id @default(uuid()) @db.Uuid
+  idempotencyKey      String                  @unique
+  marketId            String
+  venueId             String
+  kind                String
+  sequence            String
+  previousSequence    String?
+  eventTime           DateTime?               @db.Timestamptz(6)
+  receivedAt          DateTime                @db.Timestamptz(6)
+  processedAt         DateTime                @db.Timestamptz(6)
+  bids                Json
+  asks                Json
+  checksum            String?
+  depth               Int
+  rawEnvelopeId       String                  @db.Uuid
+  market              Market                  @relation(fields: [marketId], references: [id])
+  opportunitiesAsBuy  ObservedOpportunity[]   @relation("OpportunityBuyBook")
+  opportunitiesAsSell ObservedOpportunity[]   @relation("OpportunitySellBook")
+  executableAsBuy     ExecutableOpportunity[] @relation("ExecutableBuyBook")
+  executableAsSell    ExecutableOpportunity[] @relation("ExecutableSellBook")
 
   @@unique([marketId, sequence, kind])
   @@index([marketId, eventTime, id])
@@ -155,39 +157,79 @@ model MarketOrderBookEvent {
 }
 
 model DetectorConfiguration {
-  id           String   @id
-  detectorId   String
-  version      String
-  fingerprint  String   @unique
-  configuration Json
-  createdAt    DateTime @default(now()) @db.Timestamptz(6)
-  opportunities ObservedOpportunity[]
+  id                      String                  @id
+  detectorId              String
+  version                 String
+  fingerprint             String                  @unique
+  configuration           Json
+  createdAt               DateTime                @default(now()) @db.Timestamptz(6)
+  opportunities           ObservedOpportunity[]
+  executableOpportunities ExecutableOpportunity[]
 
   @@unique([detectorId, version, fingerprint])
 }
 
 model ObservedOpportunity {
-  id                  String   @id @default(uuid()) @db.Uuid
-  idempotencyKey      String   @unique
-  configurationId     String
-  canonicalSymbol     String
-  classification      String
-  direction           String
-  buyMarketId         String
-  sellMarketId        String
-  buyBookEventId      String   @db.Uuid
-  sellBookEventId     String   @db.Uuid
-  buyPrice             Decimal? @db.Decimal(38, 18)
-  sellPrice            Decimal? @db.Decimal(38, 18)
-  observedSpread       Decimal? @db.Decimal(38, 18)
-  buyFreshnessMs       Int
-  sellFreshnessMs      Int
-  crossVenueSkewMs     Int
-  rejectionReason      String?
-  evaluatedAt          DateTime @db.Timestamptz(6)
-  configuration        DetectorConfiguration @relation(fields: [configurationId], references: [id])
-  buyBook              MarketOrderBookEvent @relation("OpportunityBuyBook", fields: [buyBookEventId], references: [id])
-  sellBook             MarketOrderBookEvent @relation("OpportunitySellBook", fields: [sellBookEventId], references: [id])
+  id               String                @id @default(uuid()) @db.Uuid
+  idempotencyKey   String                @unique
+  configurationId  String
+  canonicalSymbol  String
+  classification   String
+  direction        String
+  buyMarketId      String
+  sellMarketId     String
+  buyBookEventId   String                @db.Uuid
+  sellBookEventId  String                @db.Uuid
+  buyPrice         Decimal?              @db.Decimal(38, 18)
+  sellPrice        Decimal?              @db.Decimal(38, 18)
+  observedSpread   Decimal?              @db.Decimal(38, 18)
+  buyFreshnessMs   Int
+  sellFreshnessMs  Int
+  crossVenueSkewMs Int
+  rejectionReason  String?
+  evaluatedAt      DateTime              @db.Timestamptz(6)
+  configuration    DetectorConfiguration @relation(fields: [configurationId], references: [id])
+  buyBook          MarketOrderBookEvent  @relation("OpportunityBuyBook", fields: [buyBookEventId], references: [id])
+  sellBook         MarketOrderBookEvent  @relation("OpportunitySellBook", fields: [sellBookEventId], references: [id])
+
+  @@index([canonicalSymbol, evaluatedAt])
+  @@index([classification, evaluatedAt])
+  @@index([rejectionReason, evaluatedAt])
+}
+
+model ExecutableOpportunity {
+  id                String                @id @default(uuid()) @db.Uuid
+  idempotencyKey    String                @unique
+  configurationId   String
+  canonicalSymbol   String
+  classification    String
+  direction         String
+  buyMarketId       String
+  sellMarketId      String
+  buyVenueId        String
+  sellVenueId       String
+  buyBookEventId    String                @db.Uuid
+  sellBookEventId   String                @db.Uuid
+  buyTakerFee       Decimal               @db.Decimal(38, 18)
+  sellTakerFee      Decimal               @db.Decimal(38, 18)
+  topOfBookSpread   Decimal?              @db.Decimal(38, 18)
+  bestSize          Decimal?              @db.Decimal(38, 18)
+  maxExecutableSize Decimal?              @db.Decimal(38, 18)
+  grossProfit       Decimal?              @db.Decimal(38, 18)
+  feeCost           Decimal?              @db.Decimal(38, 18)
+  slippageCost      Decimal?              @db.Decimal(38, 18)
+  netProfit         Decimal?              @db.Decimal(38, 18)
+  netProfitRate     Decimal?              @db.Decimal(38, 18)
+  sizeEvaluations   Json
+  buyFreshnessMs    Int
+  sellFreshnessMs   Int
+  crossVenueSkewMs  Int
+  rejectionReason   String?
+  blockReason       String?
+  evaluatedAt       DateTime              @db.Timestamptz(6)
+  configuration     DetectorConfiguration @relation(fields: [configurationId], references: [id])
+  buyBook           MarketOrderBookEvent  @relation("ExecutableBuyBook", fields: [buyBookEventId], references: [id])
+  sellBook          MarketOrderBookEvent  @relation("ExecutableSellBook", fields: [sellBookEventId], references: [id])
 
   @@index([canonicalSymbol, evaluatedAt])
   @@index([classification, evaluatedAt])

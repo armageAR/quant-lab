@@ -307,6 +307,8 @@ Acceptance:
 
 ### Sprint 3.2: Executable opportunity model
 
+**Status:** complete on branch `agent/sprint-3-2-executable-opportunities`. Exact volume-weighted depth walking, effective fees, configurable slippage/latency buffers, venue rules, and configured inventory produce executable/missed/observed/rejected classifications with a persisted profit curve and maximum executable size. Delivered through `@quant-lab/strategy-engine`, the `ExecutableOpportunityService`, the `/executable-opportunities` API, the `opportunity:detect:executable` command, the continuous observation worker, and the dashboard, with unit, property-based, and PostgreSQL integration coverage.
+
 **Goal:** estimate realizable profit for configured trade sizes.
 
 Tasks:

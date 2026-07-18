@@ -12,6 +12,20 @@ interface Opportunity {
   sellBookEventId: string;
 }
 
+interface ExecutableOpportunity {
+  id: string;
+  canonicalSymbol: string;
+  classification: 'executable' | 'missed' | 'observed' | 'rejected';
+  direction: string;
+  netProfit?: string;
+  netProfitRate?: string;
+  maxExecutableSize?: string;
+  topOfBookSpread?: string;
+  rejectionReason?: string;
+  blockReason?: string;
+  evaluatedAt: string;
+}
+
 interface WorkerStatus {
   enabled: boolean;
   state: 'idle' | 'running' | 'backoff' | 'stopped';
@@ -34,6 +48,21 @@ async function loadOpportunities(): Promise<readonly Opportunity[]> {
   }
 }
 
+async function loadExecutableOpportunities(): Promise<
+  readonly ExecutableOpportunity[]
+> {
+  const api = process.env.API_INTERNAL_URL ?? 'http://localhost:3000';
+  try {
+    const response = await fetch(`${api}/executable-opportunities?limit=100`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) return [];
+    return (await response.json()) as ExecutableOpportunity[];
+  } catch {
+    return [];
+  }
+}
+
 async function loadWorkerStatus(): Promise<WorkerStatus | undefined> {
   const worker = process.env.WORKER_INTERNAL_URL ?? 'http://localhost:3002';
   try {
@@ -46,8 +75,9 @@ async function loadWorkerStatus(): Promise<WorkerStatus | undefined> {
 }
 
 export default async function OpportunitiesPage() {
-  const [opportunities, worker] = await Promise.all([
+  const [opportunities, executable, worker] = await Promise.all([
     loadOpportunities(),
+    loadExecutableOpportunities(),
     loadWorkerStatus(),
   ]);
   return (
@@ -60,10 +90,12 @@ export default async function OpportunitiesPage() {
       </header>
       <section className="hero compact">
         <p className="kicker">Cross-venue evidence, not execution claims.</p>
-        <h1>Observed edges.</h1>
+        <h1>Observed and executable edges.</h1>
         <p className="lede">
-          Fresh Binance and Kraken books aligned by instrument. Fees, depth and
-          execution constraints are intentionally deferred to Sprint 3.2.
+          Fresh Binance and Kraken books aligned by instrument. Observed edges
+          record raw spreads; executable edges apply fees, order-book depth,
+          venue rules and configured inventory to estimate realizable net
+          profit.
         </p>
       </section>
       <section className="status" aria-label="Observation worker status">
@@ -127,9 +159,66 @@ export default async function OpportunitiesPage() {
           ))
         )}
       </section>
+      <section
+        className="status opportunity-list"
+        aria-label="Executable opportunities"
+      >
+        <article>
+          <div>
+            <h2>Executable evaluation</h2>
+            <p>
+              Net profit after fees, depth, venue constraints and configured
+              inventory. Profit is reported only for executable classifications.
+            </p>
+          </div>
+          <span className="badge">SPRINT 3.2</span>
+        </article>
+        {executable.length === 0 ? (
+          <article>
+            <div>
+              <h2>No executable evaluations yet</h2>
+              <p>
+                Enable `EXECUTABLE_DETECTOR_ENABLED` or run `pnpm
+                opportunity:detect:executable` to populate this view.
+              </p>
+            </div>
+            <span className="badge">IDLE</span>
+          </article>
+        ) : (
+          executable.map((item, index) => (
+            <article key={item.id}>
+              <span className="index">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div>
+                <h2>
+                  {item.canonicalSymbol} / {item.direction}
+                </h2>
+                <p>
+                  {item.classification === 'executable'
+                    ? `Net ${item.netProfit} (${item.netProfitRate}) · max size ${item.maxExecutableSize}`
+                    : item.classification === 'missed'
+                      ? `Missed: ${item.blockReason}`
+                      : item.classification === 'rejected'
+                        ? `Rejected: ${item.rejectionReason}`
+                        : `Observed spread ${item.topOfBookSpread}, no net edge`}
+                </p>
+                <small>{item.evaluatedAt}</small>
+              </div>
+              <span className={`badge ${item.classification}`}>
+                {item.classification.toUpperCase()}
+              </span>
+            </article>
+          ))
+        )}
+      </section>
       <footer>
         <span>EXECUTABILITY</span>
-        <strong>NOT EVALUATED</strong>
+        <strong>
+          {executable.some((item) => item.classification === 'executable')
+            ? 'EVALUATED'
+            : 'NO NET EDGE'}
+        </strong>
       </footer>
     </main>
   );

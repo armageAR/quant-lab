@@ -13,12 +13,13 @@ import {
 } from '@quant-lab/exchange-adapters';
 import { MarketCatalog } from '@quant-lab/market-catalog';
 import {
+  ExecutableOpportunityService,
   MarketEventStore,
   ObservedOpportunityService,
 } from '@quant-lab/market-ingestion';
 import type { Logger } from 'pino';
 
-import type { WorkerConfig } from './config';
+import { buildExecutableDetectorConfig, type WorkerConfig } from './config';
 import { ObservationLoop, type ObservationStatus } from './observation-loop';
 import {
   CONNECTIVITY_CONFIG,
@@ -90,6 +91,15 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
             },
           },
           this.logger,
+          this.config.EXECUTABLE_DETECTOR_ENABLED
+            ? {
+                service: new ExecutableOpportunityService(
+                  this.database.client,
+                  this.config.OBSERVATION_ORDER_BOOK_DEPTH,
+                ),
+                detector: buildExecutableDetectorConfig(this.config),
+              }
+            : undefined,
         );
         this.#loop.start();
       }
@@ -118,6 +128,9 @@ export class WorkerService implements OnModuleInit, OnModuleDestroy {
         evaluations: 0,
         observed: 0,
         rejected: 0,
+        executableEvaluations: 0,
+        executable: 0,
+        missed: 0,
       }),
     };
   }

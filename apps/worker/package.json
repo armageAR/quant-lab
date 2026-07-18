@@ -12,6 +12,7 @@
     "market:retain": "node dist/market-retain.js",
     "dataset": "node dist/dataset.js",
     "opportunity:detect": "node dist/opportunity-detect.js",
+    "opportunity:detect:executable": "node dist/opportunity-detect-executable.js",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
