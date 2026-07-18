@@ -17,6 +17,7 @@ describe('worker health server', () => {
       0,
       database as unknown as DatabaseLifecycle,
       metrics,
+      () => ({ enabled: true, state: 'idle', cycles: 2 }),
     );
     close = () => closeHealthServer(server);
     const { port } = server.address() as AddressInfo;
@@ -31,5 +32,8 @@ describe('worker health server', () => {
       await fetch(`http://127.0.0.1:${port}/metrics`)
     ).text();
     expect(output).toContain('quant_lab_worker_ready');
+    await expect(
+      (await fetch(`http://127.0.0.1:${port}/status`)).json(),
+    ).resolves.toMatchObject({ enabled: true, state: 'idle', cycles: 2 });
   });
 });

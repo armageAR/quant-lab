@@ -10,5 +10,7 @@ describe('loadWorkerConfig', () => {
 
     expect(config.APP_NAME).toBe('quant-lab-worker');
     expect(config.LIVE_EXECUTION_ENABLED).toBe(false);
+    expect(config.OBSERVATION_LOOP_ENABLED).toBe(true);
+    expect(config.OBSERVATION_INTERVAL_MS).toBe(10_000);
   });
 });

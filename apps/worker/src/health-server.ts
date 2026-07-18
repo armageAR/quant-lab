@@ -11,6 +11,7 @@ export async function startHealthServer(
   port: number,
   database: DatabaseLifecycle,
   metrics: ApplicationMetrics,
+  status?: () => unknown,
 ): Promise<Server> {
   const server = createServer(async (request, response) => {
     if (request.url === '/health/live') {
@@ -31,6 +32,11 @@ export async function startHealthServer(
     if (request.url === '/metrics') {
       response.writeHead(200, { 'content-type': metrics.registry.contentType });
       response.end(await metrics.registry.metrics());
+      return;
+    }
+
+    if (request.url === '/status') {
+      json(response, 200, status?.() ?? { enabled: false, state: 'stopped' });
       return;
     }
 
