@@ -1,6 +1,7 @@
 'use client';
 
-import { useDeferredValue, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useDeferredValue, useState, useTransition } from 'react';
 
 import { formatDateTime } from '../lib/time';
 
@@ -50,6 +51,8 @@ function compare(a: OpportunityRow, b: OpportunityRow, key: SortKey): number {
 }
 
 export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
+  const router = useRouter();
+  const [refreshing, startRefresh] = useTransition();
   const [symbol, setSymbol] = useState('all');
   const [direction, setDirection] = useState('all');
   const [source, setSource] = useState('all');
@@ -87,6 +90,19 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
       key,
       ascending: current.key === key ? !current.ascending : true,
     }));
+  }
+
+  function resetFilters() {
+    setSearch('');
+    setSymbol('all');
+    setDirection('all');
+    setSource('all');
+    setClassification('all');
+    setSort({ key: 'evaluatedAt', ascending: false });
+  }
+
+  function refresh() {
+    startRefresh(() => router.refresh());
   }
 
   return (
@@ -149,12 +165,39 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
             <option value="rejected">Rejected</option>
           </select>
         </label>
-        <span className="result-count">
-          {filtered.length} / {rows.length}
-        </span>
+        <div className="filter-actions">
+          <span className="result-count">
+            {filtered.length} / {rows.length}
+          </span>
+          <button
+            className="button secondary compact-button"
+            onClick={resetFilters}
+            type="button"
+          >
+            Restablecer
+          </button>
+          <button
+            className="button compact-button"
+            disabled={refreshing}
+            onClick={refresh}
+            type="button"
+          >
+            {refreshing ? 'Actualizando…' : 'Actualizar'}
+          </button>
+        </div>
       </div>
       <div className="table-scroll">
         <table>
+          <colgroup>
+            <col className="column-date" />
+            <col className="column-symbol" />
+            <col className="column-direction" />
+            <col className="column-source" />
+            <col className="column-result" />
+            <col className="column-number" />
+            <col className="column-number" />
+            <col className="column-detail" />
+          </colgroup>
           <thead>
             <tr>
               {columns.map(([key, label]) => (
