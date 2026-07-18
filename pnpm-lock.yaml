@@ -365,6 +365,9 @@ importers:
         specifier: ^10.6.0
         version: 10.6.0
     devDependencies:
+      fast-check:
+        specifier: ^3.23.2
+        version: 3.23.2
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
