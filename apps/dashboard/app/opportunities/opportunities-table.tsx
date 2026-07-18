@@ -1,0 +1,212 @@
+'use client';
+
+import { useDeferredValue, useState } from 'react';
+
+import { formatDateTime } from '../lib/time';
+
+export interface OpportunityRow {
+  classification: 'executable' | 'missed' | 'observed' | 'rejected';
+  detail: string;
+  direction: string;
+  evaluatedAt: string;
+  id: string;
+  netProfit?: string;
+  source: 'observed' | 'executable';
+  spread?: string;
+  symbol: string;
+}
+
+type SortKey = keyof Pick<
+  OpportunityRow,
+  | 'classification'
+  | 'detail'
+  | 'direction'
+  | 'evaluatedAt'
+  | 'netProfit'
+  | 'source'
+  | 'spread'
+  | 'symbol'
+>;
+
+const columns: Array<[SortKey, string]> = [
+  ['evaluatedAt', 'Fecha y hora'],
+  ['symbol', 'Especie'],
+  ['direction', 'Operación'],
+  ['source', 'Modelo'],
+  ['classification', 'Resultado'],
+  ['spread', 'Spread'],
+  ['netProfit', 'Neto'],
+  ['detail', 'Detalle'],
+];
+
+function compare(a: OpportunityRow, b: OpportunityRow, key: SortKey): number {
+  if (key === 'evaluatedAt')
+    return (
+      new Date(a.evaluatedAt).getTime() - new Date(b.evaluatedAt).getTime()
+    );
+  if (key === 'spread' || key === 'netProfit')
+    return Number(a[key] ?? 0) - Number(b[key] ?? 0);
+  return String(a[key] ?? '').localeCompare(String(b[key] ?? ''), 'es');
+}
+
+export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
+  const [symbol, setSymbol] = useState('all');
+  const [direction, setDirection] = useState('all');
+  const [source, setSource] = useState('all');
+  const [classification, setClassification] = useState('all');
+  const [search, setSearch] = useState('');
+  const deferredSearch = useDeferredValue(
+    search.trim().toLocaleLowerCase('es'),
+  );
+  const [sort, setSort] = useState<{ ascending: boolean; key: SortKey }>({
+    key: 'evaluatedAt',
+    ascending: false,
+  });
+
+  const symbols = [...new Set(rows.map((row) => row.symbol))].sort();
+  const directions = [...new Set(rows.map((row) => row.direction))].sort();
+  const filtered = rows
+    .filter((row) => symbol === 'all' || row.symbol === symbol)
+    .filter((row) => direction === 'all' || row.direction === direction)
+    .filter((row) => source === 'all' || row.source === source)
+    .filter(
+      (row) =>
+        classification === 'all' || row.classification === classification,
+    )
+    .filter(
+      (row) =>
+        !deferredSearch ||
+        `${row.symbol} ${row.direction} ${row.detail}`
+          .toLocaleLowerCase('es')
+          .includes(deferredSearch),
+    )
+    .sort((a, b) => compare(a, b, sort.key) * (sort.ascending ? 1 : -1));
+
+  function toggleSort(key: SortKey) {
+    setSort((current) => ({
+      key,
+      ascending: current.key === key ? !current.ascending : true,
+    }));
+  }
+
+  return (
+    <section className="data-panel" aria-label="Todas las oportunidades">
+      <div className="filter-bar">
+        <label>
+          Buscar
+          <input
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Símbolo o detalle"
+            type="search"
+            value={search}
+          />
+        </label>
+        <label>
+          Especie
+          <select
+            onChange={(event) => setSymbol(event.target.value)}
+            value={symbol}
+          >
+            <option value="all">Todas</option>
+            {symbols.map((value) => (
+              <option key={value}>{value}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Operación
+          <select
+            onChange={(event) => setDirection(event.target.value)}
+            value={direction}
+          >
+            <option value="all">Todas</option>
+            {directions.map((value) => (
+              <option key={value}>{value}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Modelo
+          <select
+            onChange={(event) => setSource(event.target.value)}
+            value={source}
+          >
+            <option value="all">Todos</option>
+            <option value="observed">Observado</option>
+            <option value="executable">Ejecutable</option>
+          </select>
+        </label>
+        <label>
+          Resultado
+          <select
+            onChange={(event) => setClassification(event.target.value)}
+            value={classification}
+          >
+            <option value="all">Todos</option>
+            <option value="executable">Executable</option>
+            <option value="missed">Missed</option>
+            <option value="observed">Observed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </label>
+        <span className="result-count">
+          {filtered.length} / {rows.length}
+        </span>
+      </div>
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              {columns.map(([key, label]) => (
+                <th key={key}>
+                  <button
+                    aria-label={`Ordenar por ${label}`}
+                    onClick={() => toggleSort(key)}
+                    type="button"
+                  >
+                    {label}
+                    <span>
+                      {sort.key === key ? (sort.ascending ? '↑' : '↓') : '↕'}
+                    </span>
+                  </button>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((row) => (
+              <tr key={`${row.source}-${row.id}`}>
+                <td className="date-cell">
+                  {formatDateTime(row.evaluatedAt)}
+                  <small>GMT-3</small>
+                </td>
+                <td>
+                  <strong>{row.symbol}</strong>
+                </td>
+                <td>{row.direction}</td>
+                <td>
+                  <span className="source-label">{row.source}</span>
+                </td>
+                <td>
+                  <span className={`badge ${row.classification}`}>
+                    {row.classification}
+                  </span>
+                </td>
+                <td className="numeric">{row.spread ?? '—'}</td>
+                <td className="numeric">{row.netProfit ?? '—'}</td>
+                <td className="detail-cell" title={row.detail}>
+                  {row.detail}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filtered.length === 0 ? (
+          <div className="empty-state">
+            No hay oportunidades para los filtros seleccionados.
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}

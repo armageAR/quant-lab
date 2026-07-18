@@ -16,6 +16,9 @@ interface BacktestRun {
   results?: { trades?: Array<Record<string, unknown>> };
   eligibility?: Eligibility;
   error?: string;
+  createdAt?: string;
+  startedAt?: string;
+  completedAt?: string;
 }
 
 async function loadRuns(): Promise<BacktestRun[]> {
@@ -57,19 +60,23 @@ export default async function BacktestsPage() {
   const runs = await loadRuns();
   return (
     <main>
-      <header className="compact">
-        <span className="eyebrow">QUANT LAB / HISTORICAL REPLAY</span>
-        <a className="phase" href="/">
-          PHASE 04
-        </a>
-      </header>
-      <section className="backtest-hero">
-        <p className="kicker">Determinism before paper capital.</p>
-        <h1>Backtest ledger.</h1>
-        <p className="lede">
-          Every result remains attached to its dataset, commit, seed, model
-          versions and conservative execution assumptions.
-        </p>
+      <section className="page-heading">
+        <div>
+          <span className="overline">SIMULACIÓN / HISTORICAL REPLAY</span>
+          <h1>Backtests</h1>
+          <p>Resultados ligados a dataset, commit, seed y modelos.</p>
+        </div>
+        <InfoButton title="Cómo interpretar un backtest">
+          <p>
+            Priorizá net PnL, drawdown, fill rate y falsos positivos. Un
+            resultado base positivo no alcanza: debe sostenerse con supuestos
+            conservadores y adversos.
+          </p>
+          <p>
+            El gate solo habilita la siguiente etapa de validación; nunca
+            autoriza trading real.
+          </p>
+        </InfoButton>
       </section>
       {runs.length === 0 ? (
         <section className="status">
@@ -98,6 +105,11 @@ export default async function BacktestsPage() {
               <p>
                 COMMIT {run.codeCommit.slice(0, 12)} · SEED {run.seed} · MODELS{' '}
                 {Object.values(run.modelVersions).join(' / ')}
+              </p>
+              <p className="run-time">
+                CREACIÓN {formatDateTime(run.createdAt)} · INICIO{' '}
+                {formatDateTime(run.startedAt)} · FIN{' '}
+                {formatDateTime(run.completedAt)} · GMT-3
               </p>
               <div className="metric-strip">
                 <span>NET {metric(run, 'netPnl')}</span>
@@ -129,3 +141,5 @@ export default async function BacktestsPage() {
     </main>
   );
 }
+import { InfoButton } from '../components/info-button';
+import { formatDateTime } from '../lib/time';
