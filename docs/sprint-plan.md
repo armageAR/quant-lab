@@ -412,7 +412,7 @@ Acceptance:
 
 ### Sprint 4.4: Backtest operations UI
 
-**Status:** planned. See the [Backtest Operations UI Plan](./backtest-operations-ui-plan.md).
+**Status:** complete. See the [Backtest Operations UI Plan](./backtest-operations-ui-plan.md).
 
 **Goal:** operate the complete deterministic backtest workflow from the dashboard without terminal commands.
 

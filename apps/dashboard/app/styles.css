@@ -520,6 +520,203 @@ tbody tr:hover {
   font-weight: 700;
 }
 
+.backtest-console {
+  width: min(1800px, 100%);
+}
+.compact-heading h1 {
+  font-size: clamp(26px, 3vw, 40px);
+}
+.workspace-tabs {
+  position: sticky;
+  z-index: 10;
+  top: 62px;
+  display: flex;
+  overflow-x: auto;
+  border: 1px solid var(--ink);
+  background: var(--panel);
+}
+.workspace-tabs button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-right: 1px solid var(--ink);
+  background: transparent;
+  cursor: pointer;
+  font: 700 10px var(--font-mono);
+  text-transform: uppercase;
+}
+.workspace-tabs button[aria-current='page'],
+.workspace-tabs button:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.live-message {
+  min-height: 32px;
+  margin: 0;
+  padding: 9px 2px;
+  color: var(--signal);
+  font: 700 10px var(--font-mono);
+}
+.workspace-panel {
+  padding: 18px;
+  border: 1px solid var(--ink);
+  background: var(--panel);
+}
+.workspace-panel h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+.panel-head,
+.panel-actions,
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.panel-actions {
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+.panel-actions select {
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--ink);
+  background: white;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+}
+.form-field {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font: 700 9px var(--font-mono);
+  text-transform: uppercase;
+}
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: white;
+  color: var(--ink);
+  font: 12px var(--font-sans);
+}
+.form-field select[multiple] {
+  min-height: 104px;
+}
+.dataset-create,
+.experiment-create {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.experiment-create {
+  grid-template-columns: 1fr 2fr auto;
+}
+.dataset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 10px;
+}
+.dataset-grid article {
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+}
+.dataset-grid h3 {
+  margin: 10px 0 5px;
+  font: 700 12px var(--font-mono);
+}
+.dataset-grid p {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.row-actions {
+  justify-content: flex-start;
+  align-content: flex-start;
+}
+.row-actions button,
+.row-actions a {
+  padding: 6px 8px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: 700 9px var(--font-mono);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.row-actions button:hover,
+.row-actions a:hover {
+  background: var(--signal);
+  color: white;
+}
+.experiment-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+.experiment-list button {
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: white;
+  cursor: pointer;
+  text-align: left;
+}
+.experiment-list span,
+.experiment-list small {
+  color: var(--muted);
+}
+.backtest-table {
+  min-width: 1180px;
+  table-layout: auto;
+}
+.backtest-table th {
+  padding: 10px;
+  font: 700 9px var(--font-mono);
+  text-transform: uppercase;
+}
+.backtest-table td small,
+.metric-cell small {
+  display: block;
+  max-width: 260px;
+  margin-top: 5px;
+  color: var(--muted);
+  white-space: normal;
+}
+.backtest-table details pre,
+.review-json,
+.comparison-json {
+  max-width: 800px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 10px;
+}
+.metric-cell {
+  font: 700 10px var(--font-mono);
+}
+
 .modal {
   width: min(760px, calc(100vw - 32px));
   max-height: min(80vh, 760px);
@@ -674,6 +871,13 @@ footer strong {
     border-right: 0;
     border-bottom: 1px solid var(--ink);
   }
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .dataset-create,
+  .experiment-create {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 600px) {
@@ -719,5 +923,13 @@ footer strong {
   }
   .health-row > span:last-child {
     grid-column: 2;
+  }
+  .form-grid,
+  .dataset-create,
+  .experiment-create {
+    grid-template-columns: 1fr;
+  }
+  .workspace-panel {
+    padding: 12px;
   }
 }

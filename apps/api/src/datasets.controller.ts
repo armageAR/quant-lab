@@ -37,6 +37,34 @@ export class DatasetsController {
     });
   }
 
+  @Get()
+  list(
+    @Query('limit') limit?: string,
+    @Query('cursor') cursor?: string,
+    @Query('marketId') marketId?: string,
+    @Query('pinned') pinned?: string,
+    @Query('validated') validated?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    const parsedLimit = limit === undefined ? 100 : Number(limit);
+    if (!Number.isInteger(parsedLimit) || parsedLimit < 1 || parsedLimit > 200)
+      throw new BadRequestException('limit must be between 1 and 200');
+    return this.datasets.list({
+      limit: parsedLimit,
+      ...(cursor ? { cursor } : {}),
+      ...(marketId ? { marketId } : {}),
+      ...(pinned === undefined
+        ? {}
+        : { pinned: this.boolean(pinned, 'pinned') }),
+      ...(validated === undefined
+        ? {}
+        : { validated: this.boolean(validated, 'validated') }),
+      ...(from === undefined ? {} : { from: this.optionalDate(from, 'from') }),
+      ...(to === undefined ? {} : { to: this.optionalDate(to, 'to') }),
+    });
+  }
+
   @Get(':id')
   inspect(@Param('id') id: string) {
     return this.datasets.inspect(id);
@@ -87,5 +115,15 @@ export class DatasetsController {
     if (Number.isNaN(result.getTime()))
       throw new BadRequestException(`${field} must be an ISO timestamp`);
     return result;
+  }
+
+  private boolean(value: string, field: string): boolean {
+    if (value !== 'true' && value !== 'false')
+      throw new BadRequestException(`${field} must be true or false`);
+    return value === 'true';
+  }
+
+  private optionalDate(value: string, field: string): Date {
+    return this.date(value, field);
   }
 }

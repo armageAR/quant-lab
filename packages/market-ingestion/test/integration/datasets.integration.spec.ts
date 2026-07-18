@@ -123,4 +123,20 @@ describe('HistoricalDatasetService integration', () => {
       compactedAt: expect.any(Date),
     });
   });
+
+  it('lists datasets with stable cursor and readiness filters', async () => {
+    const datasets = new HistoricalDatasetService(database.client);
+    const first = await datasets.create({
+      marketIds: [marketId],
+      from: new Date('2023-11-14T22:13:00Z'),
+      to: new Date('2023-11-14T22:16:00Z'),
+    });
+    await datasets.pin(first.id);
+    const pinned = await datasets.list({ marketId, pinned: true, limit: 1 });
+    expect(pinned.map((item) => item.id)).toContain(first.id);
+    await expect(
+      datasets.list({ cursor: pinned[0]?.id, limit: 1 }),
+    ).resolves.toEqual([]);
+    await expect(datasets.list({ validated: false })).resolves.toEqual([]);
+  });
 });

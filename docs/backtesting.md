@@ -23,6 +23,31 @@ Dataset ordinals and received timestamps must be strictly monotonic. Missing usa
 
 ## Creating a run
 
+### Dashboard workflow
+
+Start the API, worker, and dashboard with `pnpm dev`, then open
+`http://localhost:3001/backtests`. Set `APP_COMMIT_SHA` in the dashboard
+environment to the commit being tested; the run form remains blocked when it
+is unavailable.
+
+1. In **Datasets**, select comparable markets and a bounded time range. Create,
+   validate, and pin the immutable dataset.
+2. In **Experiments**, record a name and testable hypothesis.
+3. In **Configure**, select the dataset and experiment, review fees, fill
+   assumptions, seed, model versions, and validation thresholds.
+4. Review the immutable JSON and queue one run, or queue the bounded base,
+   conservative, and adverse sweep.
+5. In **Runs**, filter and refresh the queue, pause/resume/cancel eligible work,
+   inspect metrics and evidence, select two to ten runs, or download CSV.
+6. In **Compare**, interpret differences together with dataset and provenance.
+
+The browser sends all financial inputs as decimal strings. Dates are shown in
+GMT-3 while dataset requests are serialized as UTC. The dashboard uses
+same-origin `/api/backend/*` routes, so `API_INTERNAL_URL` is never exposed to
+browser code.
+
+### API fallback
+
 Create an experiment:
 
 ```bash

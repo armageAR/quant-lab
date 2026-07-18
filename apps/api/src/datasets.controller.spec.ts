@@ -33,4 +33,36 @@ describe('DatasetsController', () => {
       'marketIds is required',
     );
   });
+
+  it('lists datasets with bounded filters', async () => {
+    const datasets = { list: vi.fn().mockResolvedValue([{ id: 'dataset_1' }]) };
+    const controller = new DatasetsController(
+      datasets as unknown as HistoricalDatasetService,
+    );
+    await expect(
+      controller.list(
+        '50',
+        undefined,
+        'BINANCE:BTCUSDT',
+        'true',
+        'false',
+        '2026-07-01T00:00:00.000Z',
+        '2026-07-02T00:00:00.000Z',
+      ),
+    ).resolves.toEqual([{ id: 'dataset_1' }]);
+    expect(datasets.list).toHaveBeenCalledWith({
+      limit: 50,
+      marketId: 'BINANCE:BTCUSDT',
+      pinned: true,
+      validated: false,
+      from: new Date('2026-07-01T00:00:00.000Z'),
+      to: new Date('2026-07-02T00:00:00.000Z'),
+    });
+    expect(() => controller.list('201')).toThrow(
+      'limit must be between 1 and 200',
+    );
+    expect(() => controller.list('10', undefined, undefined, 'yes')).toThrow(
+      'pinned must be true or false',
+    );
+  });
 });
