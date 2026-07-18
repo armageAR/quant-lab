@@ -66,6 +66,19 @@ const apiGroups: Array<
       { method: 'GET', path: '/backtests/runs/:id/export.csv' },
     ],
   ],
+  [
+    'Paper trading',
+    [
+      { method: 'GET', path: '/paper-trading/sessions' },
+      { method: 'POST', path: '/paper-trading/sessions' },
+      { method: 'GET', path: '/paper-trading/sessions/:id' },
+      { method: 'POST', path: '/paper-trading/sessions/:id/start' },
+      { method: 'POST', path: '/paper-trading/sessions/:id/pause' },
+      { method: 'POST', path: '/paper-trading/sessions/:id/stop' },
+      { method: 'POST', path: '/paper-trading/sessions/:id/emergency-stop' },
+      { method: 'GET', path: '/paper-trading/campaigns/:id/report' },
+    ],
+  ],
 ] as const;
 
 interface StatusResponse {
@@ -120,6 +133,12 @@ export function TopNav() {
             href="/backtests"
           >
             <ReplayIcon /> <span>Backtests</span>
+          </a>
+          <a
+            aria-current={pathname === '/paper-trading' ? 'page' : undefined}
+            href="/paper-trading"
+          >
+            <PulseIcon /> <span>Paper</span>
           </a>
         </div>
         <div className="nav-tools">

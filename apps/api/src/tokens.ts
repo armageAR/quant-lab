@@ -8,3 +8,4 @@ export const EXECUTABLE_OPPORTUNITIES = Symbol('EXECUTABLE_OPPORTUNITIES');
 export const RESEARCH = Symbol('RESEARCH');
 export const BACKTESTS = Symbol('BACKTESTS');
 export const BACKTEST_ANALYTICS = Symbol('BACKTEST_ANALYTICS');
+export const PAPER_TRADING = Symbol('PAPER_TRADING');

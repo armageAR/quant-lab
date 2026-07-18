@@ -61,16 +61,16 @@ const database = new DatabaseLifecycle();
 const catalog = new MarketCatalog(database.client);
 const binance = new FixtureProvider(
   {
-    id: 'BINANCE',
-    code: 'BINANCE',
-    name: 'Binance',
+    id: 'TEST_BINANCE',
+    code: 'TEST_BINANCE',
+    name: 'Test Binance',
     kind: 'exchange',
     status: 'active',
   },
   [
     {
-      id: 'BINANCE:BTCUSD',
-      venueId: 'BINANCE',
+      id: 'TEST_BINANCE:BTCUSD',
+      venueId: 'TEST_BINANCE',
       instrumentId: 'BTC-USD',
       venueSymbol: 'BTC/USD',
       status: 'active',
@@ -80,16 +80,16 @@ const binance = new FixtureProvider(
 );
 const kraken = new FixtureProvider(
   {
-    id: 'KRAKEN',
-    code: 'KRAKEN',
-    name: 'Kraken',
+    id: 'TEST_KRAKEN',
+    code: 'TEST_KRAKEN',
+    name: 'Test Kraken',
     kind: 'exchange',
     status: 'active',
   },
   [
     {
-      id: 'KRAKEN:XXBTZUSD',
-      venueId: 'KRAKEN',
+      id: 'TEST_KRAKEN:XXBTZUSD',
+      venueId: 'TEST_KRAKEN',
       instrumentId: 'XBT-USD',
       venueSymbol: 'XBT/USD',
       status: 'active',
@@ -106,54 +106,68 @@ describe('MarketCatalog integration', () => {
     binance.ruleIncrement = '0.01';
     binance.markets = [
       {
-        id: 'BINANCE:BTCUSD',
-        venueId: 'BINANCE',
+        id: 'TEST_BINANCE:BTCUSD',
+        venueId: 'TEST_BINANCE',
         instrumentId: 'BTC-USD',
         venueSymbol: 'BTC/USD',
         status: 'active',
         spot: true,
       },
     ];
-    await database.client.datasetEvent.deleteMany();
-    await database.client.datasetMarket.deleteMany();
-    await database.client.datasetManifest.deleteMany();
-    await database.client.observedOpportunity.deleteMany();
-    await database.client.detectorConfiguration.deleteMany();
-    await database.client.marketTicker.deleteMany();
-    await database.client.marketTrade.deleteMany();
-    await database.client.marketCandle.deleteMany();
-    await database.client.orderBookInvalidation.deleteMany();
-    await database.client.marketOrderBookEvent.deleteMany();
-    await database.client.rawMarketEnvelope.deleteMany();
-    await database.client.clockDriftMeasurement.deleteMany();
-    await database.client.feeScheduleVersion.deleteMany();
-    await database.client.tradingRuleVersion.deleteMany();
-    await database.client.marketAlias.deleteMany();
-    await database.client.capabilitySnapshot.deleteMany();
-    await database.client.market.deleteMany();
-    await database.client.instrument.deleteMany();
-    await database.client.venue.deleteMany();
+    const marketIds = ['TEST_BINANCE:BTCUSD', 'TEST_KRAKEN:XXBTZUSD'];
+    const venueIds = ['TEST_BINANCE', 'TEST_KRAKEN'];
+    await database.client.feeScheduleVersion.deleteMany({
+      where: { marketId: { in: marketIds } },
+    });
+    await database.client.tradingRuleVersion.deleteMany({
+      where: { marketId: { in: marketIds } },
+    });
+    await database.client.marketAlias.deleteMany({
+      where: { marketId: { in: marketIds } },
+    });
+    await database.client.capabilitySnapshot.deleteMany({
+      where: { venueId: { in: venueIds } },
+    });
+    await database.client.market.deleteMany({
+      where: { id: { in: marketIds } },
+    });
+    await database.client.venue.deleteMany({ where: { id: { in: venueIds } } });
   });
 
   it('maps venue aliases to one instrument and returns comparable markets', async () => {
     await catalog.refresh([binance, kraken], ['BTC/USD']);
     const comparable = await catalog.listComparableActiveMarkets();
 
-    expect(comparable).toHaveLength(2);
+    const fixtures = comparable.filter((market) =>
+      market.venueId.startsWith('TEST_'),
+    );
+    expect(fixtures).toHaveLength(2);
     expect(
-      comparable.every((market) => market.canonicalSymbol === 'BTC/USD'),
+      fixtures.every((market) => market.canonicalSymbol === 'BTC/USD'),
     ).toBe(true);
-    expect(await database.client.instrument.count()).toBe(1);
+    expect(
+      await database.client.instrument.count({
+        where: { canonicalSymbol: 'BTC/USD' },
+      }),
+    ).toBe(1);
   });
 
   it('is idempotent and versions a precision change', async () => {
     await catalog.refresh([binance], ['BTC/USD']);
     await catalog.refresh([binance], ['BTC/USD']);
-    expect(await database.client.tradingRuleVersion.count()).toBe(1);
+    expect(
+      await database.client.tradingRuleVersion.count({
+        where: { marketId: 'TEST_BINANCE:BTCUSD' },
+      }),
+    ).toBe(1);
 
     binance.ruleIncrement = '0.1';
     await catalog.refresh([binance], ['BTC/USD']);
-    expect(await database.client.tradingRuleVersion.count()).toBe(2);
+    expect(
+      await database.client.tradingRuleVersion.count({
+        where: { marketId: 'TEST_BINANCE:BTCUSD' },
+      }),
+    ).toBe(2);
   });
 
   it('marks a missing market inactive without deleting history', async () => {
@@ -162,9 +176,13 @@ describe('MarketCatalog integration', () => {
     await catalog.refresh([binance], ['BTC/USD']);
 
     const market = await database.client.market.findUniqueOrThrow({
-      where: { id: 'BINANCE:BTCUSD' },
+      where: { id: 'TEST_BINANCE:BTCUSD' },
     });
     expect(market.status).toBe('inactive');
-    expect(await database.client.tradingRuleVersion.count()).toBe(1);
+    expect(
+      await database.client.tradingRuleVersion.count({
+        where: { marketId: 'TEST_BINANCE:BTCUSD' },
+      }),
+    ).toBe(1);
   });
 });

@@ -12,5 +12,6 @@ describe('loadWorkerConfig', () => {
     expect(config.LIVE_EXECUTION_ENABLED).toBe(false);
     expect(config.OBSERVATION_LOOP_ENABLED).toBe(true);
     expect(config.OBSERVATION_INTERVAL_MS).toBe(10_000);
+    expect(config.PAPER_TRADING_ENABLED).toBe(false);
   });
 });

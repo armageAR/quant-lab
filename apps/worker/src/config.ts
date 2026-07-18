@@ -9,6 +9,15 @@ const workerConfigSchema = baseConfigSchema.extend({
   DATABASE_URL: z.string().url(),
   WORKER_HEALTH_PORT: z.coerce.number().int().min(1).max(65_535).default(3002),
   BACKTEST_POLL_INTERVAL_MS: z.coerce.number().int().min(250).default(1_000),
+  PAPER_TRADING_POLL_INTERVAL_MS: z.coerce
+    .number()
+    .int()
+    .min(250)
+    .default(2_000),
+  PAPER_TRADING_ENABLED: z
+    .enum(['true', 'false'])
+    .transform((value) => value === 'true')
+    .default(false),
   OBSERVATION_LOOP_ENABLED: z
     .enum(['true', 'false'])
     .transform((value) => value === 'true')

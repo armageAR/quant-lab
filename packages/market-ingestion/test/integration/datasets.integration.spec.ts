@@ -15,11 +15,23 @@ const marketId = 'DATASET:BTCUSD';
 describe('HistoricalDatasetService integration', () => {
   beforeAll(async () => {
     await database.connect();
-    await database.client.datasetEvent.deleteMany();
-    await database.client.datasetMarket.deleteMany();
-    await database.client.datasetManifest.deleteMany();
-    await database.client.observedOpportunity.deleteMany();
-    await database.client.detectorConfiguration.deleteMany();
+    const manifests = await database.client.datasetMarket.findMany({
+      where: { marketId },
+      select: { manifestId: true },
+    });
+    const manifestIds = manifests.map((item) => item.manifestId);
+    await database.client.backtestRun.deleteMany({
+      where: { datasetId: { in: manifestIds } },
+    });
+    await database.client.datasetEvent.deleteMany({
+      where: { manifestId: { in: manifestIds } },
+    });
+    await database.client.datasetMarket.deleteMany({
+      where: { manifestId: { in: manifestIds } },
+    });
+    await database.client.datasetManifest.deleteMany({
+      where: { id: { in: manifestIds } },
+    });
     await database.client.marketTicker.deleteMany({ where: { marketId } });
     await database.client.rawMarketEnvelope.deleteMany({ where: { marketId } });
     await database.client.market.deleteMany({ where: { id: marketId } });
@@ -134,9 +146,10 @@ describe('HistoricalDatasetService integration', () => {
     await datasets.pin(first.id);
     const pinned = await datasets.list({ marketId, pinned: true, limit: 1 });
     expect(pinned.map((item) => item.id)).toContain(first.id);
+    const next = await datasets.list({ cursor: pinned[0]?.id, limit: 1 });
+    expect(next.map((item) => item.id)).not.toContain(first.id);
     await expect(
-      datasets.list({ cursor: pinned[0]?.id, limit: 1 }),
+      datasets.list({ marketId, validated: false }),
     ).resolves.toEqual([]);
-    await expect(datasets.list({ validated: false })).resolves.toEqual([]);
   });
 });

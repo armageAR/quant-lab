@@ -15,15 +15,18 @@ const db = new DatabaseLifecycle();
 describe('MarketEventStore integration', () => {
   beforeAll(async () => {
     await db.connect();
-    await db.client.datasetEvent.deleteMany();
-    await db.client.datasetMarket.deleteMany();
-    await db.client.datasetManifest.deleteMany();
-    await db.client.observedOpportunity.deleteMany();
-    await db.client.detectorConfiguration.deleteMany();
-    await db.client.orderBookInvalidation.deleteMany();
-    await db.client.marketOrderBookEvent.deleteMany();
-    await db.client.marketTicker.deleteMany();
-    await db.client.rawMarketEnvelope.deleteMany();
+    await db.client.orderBookInvalidation.deleteMany({
+      where: { marketId: 'TEST:BTCUSD' },
+    });
+    await db.client.marketOrderBookEvent.deleteMany({
+      where: { marketId: 'TEST:BTCUSD' },
+    });
+    await db.client.marketTicker.deleteMany({
+      where: { marketId: 'TEST:BTCUSD' },
+    });
+    await db.client.rawMarketEnvelope.deleteMany({
+      where: { marketId: 'TEST:BTCUSD' },
+    });
     await db.client.venue.upsert({
       where: { id: 'TEST' },
       create: {
