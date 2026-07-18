@@ -51,7 +51,11 @@ export async function bootstrap(): Promise<void> {
     async () => {
       metrics.gracefulShutdowns.inc();
       logger.info('Worker shutting down');
-      await closeHealthServer(healthServer);
+      try {
+        await closeHealthServer(healthServer);
+      } catch (error) {
+        logger.error({ err: error }, 'Health server close failed');
+      }
       await app.close();
       logger.info('Worker stopped');
     },

@@ -136,6 +136,7 @@ export class ObservationLoop {
     this.#status.nextRunAt = new Date(Date.now() + delay).toISOString();
     this.#timer = setTimeout(() => {
       this.#timer = undefined;
+      if (this.#stopping) return;
       this.#active = this.tick().finally(() => {
         this.#active = undefined;
       });
@@ -153,7 +154,7 @@ export class ObservationLoop {
       this.#status.lastError =
         error instanceof Error ? error.message : 'unknown observation error';
       delay = Math.min(
-        this.config.intervalMs * 2 ** (this.#status.consecutiveFailures - 1),
+        this.config.intervalMs * 2 ** this.#status.consecutiveFailures,
         this.config.maxBackoffMs,
       );
       this.#status.state = 'backoff';
