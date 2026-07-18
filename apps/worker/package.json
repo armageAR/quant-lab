@@ -13,6 +13,7 @@
     "dataset": "node dist/dataset.js",
     "opportunity:detect": "node dist/opportunity-detect.js",
     "opportunity:detect:executable": "node dist/opportunity-detect-executable.js",
+    "research:report": "node dist/research-report.js",
     "lint": "eslint src --max-warnings=0",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -20,6 +21,7 @@
   "dependencies": {
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
+    "@quant-lab/analytics": "workspace:*",
     "@quant-lab/database": "workspace:*",
     "@quant-lab/exchange-adapters": "workspace:*",
     "@quant-lab/market-catalog": "workspace:*",

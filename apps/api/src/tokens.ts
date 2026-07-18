@@ -5,3 +5,4 @@ export const MARKET_EVENTS = Symbol('MARKET_EVENTS');
 export const DATASETS = Symbol('DATASETS');
 export const OPPORTUNITIES = Symbol('OPPORTUNITIES');
 export const EXECUTABLE_OPPORTUNITIES = Symbol('EXECUTABLE_OPPORTUNITIES');
+export const RESEARCH = Symbol('RESEARCH');

@@ -55,6 +55,19 @@ footer {
 .badge.rejected {
   opacity: 0.65;
 }
+.badge.executable {
+  background: var(--ink);
+  color: var(--paper, #fff);
+}
+.badge.missed {
+  border: 1px solid var(--ink);
+}
+.metric {
+  font:
+    700 15px var(--font-mono),
+    monospace;
+  color: var(--ink);
+}
 a.phase {
   text-decoration: none;
 }

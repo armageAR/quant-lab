@@ -156,10 +156,7 @@ export class ObservationLoop {
           (result) => result.classification === 'missed',
         ).length;
       } catch (error) {
-        this.logger.error(
-          { err: error },
-          'Executable evaluation failed',
-        );
+        this.logger.error({ err: error }, 'Executable evaluation failed');
       }
     }
     this.#status.lastCompletedAt = new Date().toISOString();

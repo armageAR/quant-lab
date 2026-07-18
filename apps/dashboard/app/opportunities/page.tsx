@@ -26,6 +26,35 @@ interface ExecutableOpportunity {
   evaluatedAt: string;
 }
 
+interface ResearchReport {
+  evaluated: number;
+  apparentEdges: number;
+  survivingEdges: number;
+  falsePositiveRate: string;
+  attribution: {
+    grossProfit: string;
+    feeCost: string;
+    slippageCost: string;
+    netProfit: string;
+    feeShare: string;
+    slippageShare: string;
+  };
+  latency: {
+    submissionDelayMs: number;
+    episodes: number;
+    medianDurationMs: number;
+    removedByLatency: number;
+    removedByLatencyRate: string;
+  };
+  feedQuality: {
+    averageFreshnessMs: number;
+    maxFreshnessMs: number;
+    averageSkewMs: number;
+    maxSkewMs: number;
+  };
+  eligibility: { eligible: boolean; reasons: string[] };
+}
+
 interface WorkerStatus {
   enabled: boolean;
   state: 'idle' | 'running' | 'backoff' | 'stopped';
@@ -63,6 +92,19 @@ async function loadExecutableOpportunities(): Promise<
   }
 }
 
+async function loadResearchReport(): Promise<ResearchReport | undefined> {
+  const api = process.env.API_INTERNAL_URL ?? 'http://localhost:3000';
+  try {
+    const response = await fetch(`${api}/research/report`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) return undefined;
+    return (await response.json()) as ResearchReport;
+  } catch {
+    return undefined;
+  }
+}
+
 async function loadWorkerStatus(): Promise<WorkerStatus | undefined> {
   const worker = process.env.WORKER_INTERNAL_URL ?? 'http://localhost:3002';
   try {
@@ -75,9 +117,10 @@ async function loadWorkerStatus(): Promise<WorkerStatus | undefined> {
 }
 
 export default async function OpportunitiesPage() {
-  const [opportunities, executable, worker] = await Promise.all([
+  const [opportunities, executable, report, worker] = await Promise.all([
     loadOpportunities(),
     loadExecutableOpportunities(),
+    loadResearchReport(),
     loadWorkerStatus(),
   ]);
   return (
@@ -211,6 +254,90 @@ export default async function OpportunitiesPage() {
             </article>
           ))
         )}
+      </section>
+      <section className="status research-report" aria-label="Research report">
+        <article>
+          <div>
+            <h2>Research report</h2>
+            <p>
+              {report
+                ? `${report.evaluated} evaluations · latency assumes ${report.latency.submissionDelayMs}ms submission delay`
+                : 'Report unavailable. Start the API to compute latency and false-positive metrics.'}
+            </p>
+          </div>
+          <span
+            className={`badge ${report?.eligibility.eligible ? 'executable' : ''}`}
+          >
+            {report
+              ? report.eligibility.eligible
+                ? 'BACKTEST-READY'
+                : 'NOT READY'
+              : 'OFFLINE'}
+          </span>
+        </article>
+        {report ? (
+          <>
+            <article>
+              <div>
+                <h2>False positives</h2>
+                <p>
+                  {report.survivingEdges}/{report.apparentEdges} apparent edges
+                  survive fees, depth and constraints.
+                </p>
+              </div>
+              <span className="metric">{report.falsePositiveRate}</span>
+            </article>
+            <article>
+              <div>
+                <h2>Gross to net</h2>
+                <p>
+                  Gross {report.attribution.grossProfit} · fees{' '}
+                  {report.attribution.feeCost} ({report.attribution.feeShare}) ·
+                  slippage {report.attribution.slippageCost} · net{' '}
+                  {report.attribution.netProfit}
+                </p>
+              </div>
+              <span className="metric">{report.attribution.netProfit}</span>
+            </article>
+            <article>
+              <div>
+                <h2>Latency removal</h2>
+                <p>
+                  {report.latency.removedByLatency}/{report.latency.episodes}{' '}
+                  executable episodes vanished faster than the submission delay
+                  (median {report.latency.medianDurationMs}ms).
+                </p>
+              </div>
+              <span className="metric">
+                {report.latency.removedByLatencyRate}
+              </span>
+            </article>
+            {report.feedQuality.maxFreshnessMs >
+            report.latency.submissionDelayMs ? (
+              <article>
+                <div>
+                  <h2>Data-quality warning</h2>
+                  <p>
+                    Max feed age {report.feedQuality.maxFreshnessMs}ms exceeds
+                    the {report.latency.submissionDelayMs}ms submission delay;
+                    treat these edges with caution.
+                  </p>
+                </div>
+                <span className="badge">WARNING</span>
+              </article>
+            ) : null}
+            {!report.eligibility.eligible &&
+            report.eligibility.reasons.length > 0 ? (
+              <article>
+                <div>
+                  <h2>Backtest gate</h2>
+                  <p>{report.eligibility.reasons.join('; ')}</p>
+                </div>
+                <span className="badge">BLOCKED</span>
+              </article>
+            ) : null}
+          </>
+        ) : null}
       </section>
       <footer>
         <span>EXECUTABILITY</span>

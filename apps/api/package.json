@@ -14,6 +14,7 @@
     "@nestjs/common": "^11.1.11",
     "@nestjs/core": "^11.1.11",
     "@nestjs/platform-express": "^11.1.11",
+    "@quant-lab/analytics": "workspace:*",
     "@quant-lab/database": "workspace:*",
     "@quant-lab/market-catalog": "workspace:*",
     "@quant-lab/market-ingestion": "workspace:*",

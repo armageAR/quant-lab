@@ -1,4 +1,8 @@
 import { DynamicModule, Module } from '@nestjs/common';
+import {
+  ArbitrageResearchService,
+  researchReportConfigFromEnv,
+} from '@quant-lab/analytics';
 import type { DatabaseLifecycle } from '@quant-lab/database';
 import { MarketCatalog } from '@quant-lab/market-catalog';
 import {
@@ -14,6 +18,7 @@ import { DatasetsController } from './datasets.controller';
 import { MetricsController } from './metrics.controller';
 import { OpportunitiesController } from './opportunities.controller';
 import { ExecutableOpportunitiesController } from './executable-opportunities.controller';
+import { ResearchController } from './research.controller';
 import { MarketsController } from './markets.controller';
 import {
   DATABASE,
@@ -23,6 +28,7 @@ import {
   MARKET_EVENTS,
   METRICS,
   OPPORTUNITIES,
+  RESEARCH,
 } from './tokens';
 
 @Module({})
@@ -40,6 +46,7 @@ export class AppModule {
         DatasetsController,
         OpportunitiesController,
         ExecutableOpportunitiesController,
+        ResearchController,
       ],
       providers: [
         { provide: DATABASE, useValue: database },
@@ -63,6 +70,13 @@ export class AppModule {
         {
           provide: EXECUTABLE_OPPORTUNITIES,
           useValue: new ExecutableOpportunityService(database.client),
+        },
+        {
+          provide: RESEARCH,
+          useValue: new ArbitrageResearchService(
+            database.client,
+            researchReportConfigFromEnv(),
+          ),
         },
       ],
     };
