@@ -3,17 +3,16 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Inject,
   Param,
   Post,
   Query,
 } from '@nestjs/common';
-import {
-  BacktestRunService,
-  type JsonObject,
-} from '@quant-lab/simulation';
+import { BacktestAnalyticsService } from '@quant-lab/analytics';
+import { BacktestRunService, type JsonObject } from '@quant-lab/simulation';
 
-import { BACKTESTS } from './tokens';
+import { BACKTEST_ANALYTICS, BACKTESTS } from './tokens';
 
 interface ExperimentBody {
   name?: string;
@@ -29,10 +28,16 @@ interface RunBody {
   modelVersions?: Record<string, string>;
 }
 
+interface SweepBody extends Omit<RunBody, 'configuration'> {
+  configurations?: JsonObject[];
+}
+
 @Controller('backtests')
 export class BacktestsController {
   constructor(
     @Inject(BACKTESTS) private readonly backtests: BacktestRunService,
+    @Inject(BACKTEST_ANALYTICS)
+    private readonly analytics: BacktestAnalyticsService,
   ) {}
 
   @Post('experiments')
@@ -63,7 +68,14 @@ export class BacktestsController {
         seed: body.seed ?? 1,
         codeCommit: body.codeCommit ?? '',
         configuration: body.configuration ?? {},
-        modelVersions: body.modelVersions ?? { replay: '1.0.0' },
+        modelVersions: body.modelVersions ?? {
+          replay: '1.0.0',
+          fill: 'fill-v1',
+          fees: '1.0.0',
+          slippage: '1.0.0',
+          latency: '1.0.0',
+          rebalancing: '1.0.0',
+        },
       });
     } catch (error) {
       throw this.badRequest(error);
@@ -77,7 +89,55 @@ export class BacktestsController {
 
   @Get('runs/:id')
   run(@Param('id') id: string) {
-    return this.backtests.inspect(id);
+    return this.analytics.inspect(id);
+  }
+
+  @Get('runs/:id/export.csv')
+  @Header('Content-Type', 'text/csv; charset=utf-8')
+  @Header('Content-Disposition', 'attachment; filename="backtest-run.csv"')
+  csv(@Param('id') id: string) {
+    return this.analytics.csv(id);
+  }
+
+  @Get('compare')
+  compare(@Query('ids') ids?: string) {
+    return this.analytics
+      .compare(
+        (ids ?? '')
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean),
+      )
+      .catch((error: unknown) => {
+        throw this.badRequest(error);
+      });
+  }
+
+  @Post('sweeps')
+  sweep(@Body() body: SweepBody) {
+    if (!body.experimentId || !body.datasetId)
+      throw new BadRequestException('experimentId and datasetId are required');
+    return this.analytics
+      .sweep(
+        {
+          experimentId: body.experimentId,
+          datasetId: body.datasetId,
+          seed: body.seed ?? 1,
+          codeCommit: body.codeCommit ?? '',
+          modelVersions: body.modelVersions ?? {
+            replay: '1.0.0',
+            fill: 'fill-v1',
+            fees: '1.0.0',
+            slippage: '1.0.0',
+            latency: '1.0.0',
+            rebalancing: '1.0.0',
+          },
+        },
+        body.configurations ?? [],
+      )
+      .catch((error: unknown) => {
+        throw this.badRequest(error);
+      });
   }
 
   @Post('runs/:id/pause')

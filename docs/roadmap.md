@@ -83,6 +83,8 @@ Completion indicators:
 
 ## Phase 4: Backtesting and simulation
 
+Status: complete. Sprints 4.1 (deterministic replay and queued runs), 4.2 (versioned execution models), and 4.3 (analytics, comparison, exports, dashboard, and paper-trading gate) are implemented.
+
 Scope:
 - deterministic backtesting;
 - simulation clock;

@@ -1,4 +1,5 @@
 import Decimal from 'decimal.js';
+import { createHash } from 'node:crypto';
 
 import {
   simulateFill,
@@ -43,6 +44,8 @@ export interface SimulatedArbitrageTrade {
   buyVenueId: string;
   sellVenueId: string;
   requestedQuantity: string;
+  executed: boolean;
+  profitable: boolean;
   matchedQuantity: string;
   inventoryImbalance: string;
   grossProfit: string;
@@ -53,6 +56,25 @@ export interface SimulatedArbitrageTrade {
   capitalRequired: string;
   buyFill: SimulatedFill;
   sellFill: SimulatedFill;
+}
+
+export interface BacktestMetrics {
+  attempts: number;
+  executedTrades: number;
+  profitableTrades: number;
+  grossPnl: string;
+  feeCost: string;
+  slippageCost: string;
+  rebalancingCost: string;
+  netPnl: string;
+  maxDrawdown: string;
+  hitRate: string;
+  fillRate: string;
+  capitalUtilization: string;
+  peakCapitalRequired: string;
+  inventoryImbalance: string;
+  falsePositiveRate: string;
+  lookAheadViolations: number;
 }
 
 interface OrderBookPayload {
@@ -66,6 +88,28 @@ interface OrderBookPayload {
 function canonical(value: Decimal): string {
   const result = value.toFixed();
   return result === '-0' ? '0' : result;
+}
+
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (value && typeof value === 'object')
+    return `{${Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => `${JSON.stringify(key)}:${canonicalJson(item)}`)
+      .join(',')}}`;
+  return JSON.stringify(value);
+}
+
+function venueFee(config: BacktestScenarioConfig, venueId: string): string {
+  const value = config.feeRates[venueId];
+  if (value === undefined)
+    throw new RangeError(`missing fee rate for venue ${venueId}`);
+  return value;
+}
+
+function rate(numerator: number, denominator: number): string {
+  if (denominator === 0) return '0';
+  return canonical(new ExactDecimal(numerator).dividedBy(denominator));
 }
 
 function positive(value: unknown, field: string, allowZero = true): string {
@@ -223,6 +267,7 @@ function trade(
   sellBook: ExecutionBook,
   config: BacktestScenarioConfig,
 ): SimulatedArbitrageTrade | undefined {
+  assertNoLookAhead(observedAt, [buyBook, sellBook]);
   const bestAsk = buyBook.asks[0];
   const bestBid = sellBook.bids[0];
   if (!bestAsk || !bestBid) return undefined;
@@ -240,7 +285,7 @@ function trade(
     {
       ...common,
       side: 'buy',
-      feeRate: config.feeRates[buyBook.venueId] ?? '0',
+      feeRate: venueFee(config, buyBook.venueId),
       ...(config.orderType === 'limit' ? { limitPrice: bestAsk.price } : {}),
     },
     buyBook,
@@ -250,7 +295,7 @@ function trade(
     {
       ...common,
       side: 'sell',
-      feeRate: config.feeRates[sellBook.venueId] ?? '0',
+      feeRate: venueFee(config, sellBook.venueId),
       ...(config.orderType === 'limit' ? { limitPrice: bestBid.price } : {}),
     },
     sellBook,
@@ -258,26 +303,29 @@ function trade(
   );
   const buyQuantity = new ExactDecimal(buyFill.filledQuantity);
   const sellQuantity = new ExactDecimal(sellFill.filledQuantity);
-  if (buyQuantity.isZero() && sellQuantity.isZero()) return undefined;
   const matched = Decimal.min(buyQuantity, sellQuantity);
   const imbalance = buyQuantity.minus(sellQuantity).abs();
   const buyAverage = new ExactDecimal(buyFill.averagePrice ?? '0');
   const sellAverage = new ExactDecimal(sellFill.averagePrice ?? '0');
-  const gross = sellAverage.minus(buyAverage).times(matched);
+  const executionGross = sellAverage.minus(buyAverage).times(matched);
   const fees = new ExactDecimal(buyFill.fee).plus(sellFill.fee);
   const slippage = new ExactDecimal(buyFill.slippageCost).plus(
     sellFill.slippageCost,
   );
+  const gross = executionGross.plus(slippage);
   const rebalancing = imbalance
     .times(Decimal.max(buyAverage, sellAverage))
     .times(config.inventoryRebalanceRate);
-  const net = gross.minus(fees).minus(rebalancing);
+  const net = gross.minus(fees).minus(slippage).minus(rebalancing);
+  const executed = matched.greaterThan(0);
   return {
     observedAt,
     canonicalSymbol: symbol,
     buyVenueId: buyBook.venueId,
     sellVenueId: sellBook.venueId,
     requestedQuantity: config.tradeSize,
+    executed,
+    profitable: executed && net.greaterThan(0),
     matchedQuantity: canonical(matched),
     inventoryImbalance: canonical(imbalance),
     grossProfit: canonical(gross),
@@ -290,6 +338,76 @@ function trade(
     ),
     buyFill,
     sellFill,
+  };
+}
+
+export function assertNoLookAhead(
+  observedAt: string,
+  books: readonly ExecutionBook[],
+): void {
+  const decisionTime = new Date(observedAt).getTime();
+  if (!Number.isFinite(decisionTime))
+    throw new RangeError('decision time is invalid');
+  for (const book of books)
+    if (new Date(book.receivedAt).getTime() > decisionTime)
+      throw new RangeError(
+        `look-ahead detected: book ${book.eventId} was not available at decision time`,
+      );
+}
+
+export function calculateBacktestMetrics(
+  trades: readonly SimulatedArbitrageTrade[],
+): BacktestMetrics {
+  let gross = new ExactDecimal(0);
+  let fees = new ExactDecimal(0);
+  let slippage = new ExactDecimal(0);
+  let rebalancing = new ExactDecimal(0);
+  let net = new ExactDecimal(0);
+  let peak = new ExactDecimal(0);
+  let cumulative = new ExactDecimal(0);
+  let cumulativePeak = new ExactDecimal(0);
+  let drawdown = new ExactDecimal(0);
+  let imbalance = new ExactDecimal(0);
+  let capitalSum = new ExactDecimal(0);
+  let executed = 0;
+  let profitable = 0;
+  for (const item of trades) {
+    gross = gross.plus(item.grossProfit);
+    fees = fees.plus(item.feeCost);
+    slippage = slippage.plus(item.slippageCost);
+    rebalancing = rebalancing.plus(item.rebalancingCost);
+    net = net.plus(item.netProfit);
+    imbalance = imbalance.plus(item.inventoryImbalance);
+    const capital = new ExactDecimal(item.capitalRequired);
+    capitalSum = capitalSum.plus(capital);
+    peak = Decimal.max(peak, capital);
+    cumulative = cumulative.plus(item.netProfit);
+    cumulativePeak = Decimal.max(cumulativePeak, cumulative);
+    drawdown = Decimal.max(drawdown, cumulativePeak.minus(cumulative));
+    if (item.executed) executed += 1;
+    if (item.profitable) profitable += 1;
+  }
+  const capitalUtilization =
+    peak.isZero() || trades.length === 0
+      ? new ExactDecimal(0)
+      : capitalSum.dividedBy(peak.times(trades.length));
+  return {
+    attempts: trades.length,
+    executedTrades: executed,
+    profitableTrades: profitable,
+    grossPnl: canonical(gross),
+    feeCost: canonical(fees),
+    slippageCost: canonical(slippage),
+    rebalancingCost: canonical(rebalancing),
+    netPnl: canonical(net),
+    maxDrawdown: canonical(drawdown),
+    hitRate: rate(profitable, executed),
+    fillRate: rate(executed, trades.length),
+    capitalUtilization: canonical(capitalUtilization),
+    peakCapitalRequired: canonical(peak),
+    inventoryImbalance: canonical(imbalance),
+    falsePositiveRate: rate(trades.length - profitable, trades.length),
+    lookAheadViolations: 0,
   };
 }
 
@@ -335,12 +453,23 @@ export async function executeArbitrageBacktest(
     },
     options,
   );
+  const metrics = calculateBacktestMetrics(replay.outputs);
+  const outputHash = createHash('sha256')
+    .update(
+      canonicalJson({
+        replayHash: replay.outputHash,
+        codeCommit: run.codeCommit,
+        configuration: run.configuration,
+        modelVersions: run.modelVersions,
+      }),
+    )
+    .digest('hex');
   return {
-    outputHash: replay.outputHash,
+    outputHash,
     metrics: {
       eventCount: replay.eventCount,
-      opportunityCount: replay.outputs.length,
       scenario: config.scenario,
+      ...metrics,
     },
     results: { trades: replay.outputs as unknown as JsonObject['trades'] },
   };

@@ -213,6 +213,9 @@ importers:
       '@quant-lab/market-ingestion':
         specifier: workspace:*
         version: link:../market-ingestion
+      '@quant-lab/simulation':
+        specifier: workspace:*
+        version: link:../simulation
       decimal.js:
         specifier: ^10.6.0
         version: 10.6.0
@@ -408,6 +411,9 @@ importers:
       '@types/node':
         specifier: ^20.19.27
         version: 20.19.43
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.4.2
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

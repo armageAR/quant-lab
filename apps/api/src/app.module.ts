@@ -1,6 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import {
   ArbitrageResearchService,
+  BacktestAnalyticsService,
   researchReportConfigFromEnv,
 } from '@quant-lab/analytics';
 import type { DatabaseLifecycle } from '@quant-lab/database';
@@ -32,6 +33,7 @@ import {
   OPPORTUNITIES,
   RESEARCH,
   BACKTESTS,
+  BACKTEST_ANALYTICS,
 } from './tokens';
 
 @Module({})
@@ -85,6 +87,10 @@ export class AppModule {
         {
           provide: BACKTESTS,
           useValue: new BacktestRunService(database.client),
+        },
+        {
+          provide: BACKTEST_ANALYTICS,
+          useValue: new BacktestAnalyticsService(database.client),
         },
       ],
     };

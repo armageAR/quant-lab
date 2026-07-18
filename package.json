@@ -11,7 +11,7 @@
     "dev": "turbo dev --concurrency 20",
     "lint": "turbo lint",
     "test": "turbo test",
-    "test:integration": "pnpm --filter @quant-lab/database test:integration && pnpm --filter @quant-lab/market-catalog test:integration && pnpm --filter @quant-lab/market-ingestion test:integration && pnpm --filter @quant-lab/analytics test:integration",
+    "test:integration": "pnpm --filter @quant-lab/database test:integration && pnpm --filter @quant-lab/market-catalog test:integration && pnpm --filter @quant-lab/market-ingestion test:integration && pnpm --filter @quant-lab/analytics test:integration && pnpm --filter @quant-lab/simulation test:integration",
     "test:process": "node scripts/check-process-lifecycle.mjs",
     "test:exchange": "pnpm --filter @quant-lab/exchange-adapters test:integration",
     "exchange:check": "pnpm --filter @quant-lab/exchange-adapters build && pnpm --filter @quant-lab/exchange-adapters connectivity",

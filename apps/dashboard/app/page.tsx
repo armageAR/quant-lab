@@ -33,6 +33,8 @@ export default function Home() {
       </section>
       <p className="research-link">
         <a href="/opportunities">Inspect observed cross-venue opportunities</a>
+        <br />
+        <a href="/backtests">Review deterministic backtest runs</a>
       </p>
       <footer>
         <span>LIVE EXECUTION</span>

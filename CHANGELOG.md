@@ -1,5 +1,7 @@
 # Changelog
 
+- Completed Phase 4 with deterministic historical replay, realistic execution models, persisted backtest runs, analytics, comparisons, exports, dashboard visibility, and a quantitative paper-trading gate.
+
 All notable changes are recorded here. Quant Lab follows a lightweight Keep a Changelog structure while the project is pre-release.
 
 ## Unreleased

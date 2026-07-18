@@ -351,6 +351,8 @@ Acceptance:
 
 ### Sprint 4.1: Deterministic replay engine
 
+**Status:** complete.
+
 **Goal:** replay historical market evidence through the same detector contracts.
 
 Tasks:
@@ -370,6 +372,8 @@ Acceptance:
 
 ### Sprint 4.2: Fill, fee, slippage, and partial-fill models
 
+**Status:** complete.
+
 **Goal:** replace optimistic opportunity assumptions with explicit execution simulation.
 
 Tasks:
@@ -387,6 +391,8 @@ Acceptance:
 - Scenario results expose sensitivity to latency, fees, and requested size.
 
 ### Sprint 4.3: Backtest analytics and comparison
+
+**Status:** complete.
 
 **Goal:** decide whether the arbitrage hypothesis survives historical testing.
 

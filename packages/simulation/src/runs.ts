@@ -145,6 +145,16 @@ export class BacktestRunService {
     if (!Number.isSafeInteger(input.seed))
       throw new RangeError('seed must be a safe integer');
     if (!input.codeCommit.trim()) throw new TypeError('codeCommit is required');
+    for (const model of [
+      'replay',
+      'fill',
+      'fees',
+      'slippage',
+      'latency',
+      'rebalancing',
+    ])
+      if (!input.modelVersions[model]?.trim())
+        throw new TypeError(`modelVersions.${model} is required`);
     const row = await this.database.backtestRun.create({
       data: {
         experimentId: input.experimentId,
