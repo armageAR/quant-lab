@@ -6,12 +6,7 @@ export type BacktestRunStatus =
   'queued' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
 
 export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonObject
-  | readonly JsonValue[];
+  string | number | boolean | null | JsonObject | readonly JsonValue[];
 export interface JsonObject {
   readonly [key: string]: JsonValue;
 }
@@ -309,22 +304,47 @@ export class BacktestRunService {
     const envelopes = await this.database.rawMarketEnvelope.findMany({
       where: { id: { in: references.map((item) => item.sourceId) } },
     });
+    const orderBooks = await this.database.marketOrderBookEvent.findMany({
+      where: { rawEnvelopeId: { in: references.map((item) => item.sourceId) } },
+    });
+    const normalizedBooks = new Map(
+      orderBooks.map((book) => [book.rawEnvelopeId, book]),
+    );
+    const markets = await this.database.market.findMany({
+      where: { id: { in: envelopes.map((item) => item.marketId) } },
+      include: { instrument: true },
+    });
+    const symbols = new Map(
+      markets.map((market) => [market.id, market.instrument.canonicalSymbol]),
+    );
     const sources = new Map(envelopes.map((item) => [item.id, item]));
     return references.map((reference) => {
       const source = sources.get(reference.sourceId);
       if (!source)
         throw new Error(`dataset source is missing: ${reference.sourceId}`);
+      const book = normalizedBooks.get(source.id);
       return {
         ordinal: reference.ordinal,
         sourceId: source.id,
         eventType: source.eventType,
         marketId: source.marketId,
         venueId: source.venueId,
+        ...(symbols.get(source.marketId)
+          ? { canonicalSymbol: symbols.get(source.marketId) }
+          : {}),
         ...(source.eventTime
           ? { eventTime: source.eventTime.toISOString() }
           : {}),
         receivedAt: source.receivedAt.toISOString(),
-        payload: source.payload,
+        payload: book
+          ? {
+              kind: 'orderBook',
+              eventId: book.id,
+              valid: true,
+              bids: book.bids,
+              asks: book.asks,
+            }
+          : source.payload,
       };
     });
   }

@@ -8,6 +8,7 @@ export interface ReplayEvent {
   eventType: string;
   marketId: string;
   venueId: string;
+  canonicalSymbol?: string;
   eventTime?: string;
   receivedAt: string;
   payload: unknown;
