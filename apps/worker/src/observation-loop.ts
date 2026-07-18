@@ -43,6 +43,7 @@ export interface ObservationStatus {
   lastError?: string;
   nextRunAt?: string;
   orderBooks: number;
+  orderBookFailures: number;
   evaluations: number;
   observed: number;
   rejected: number;
@@ -63,6 +64,7 @@ export class ObservationLoop {
     cycles: 0,
     consecutiveFailures: 0,
     orderBooks: 0,
+    orderBookFailures: 0,
     evaluations: 0,
     observed: 0,
     rejected: 0,
@@ -108,8 +110,15 @@ export class ObservationLoop {
       now.getTime() - this.#lastCatalogRefresh >=
       this.config.catalogRefreshMs
     ) {
-      await this.catalog.refresh(this.providers, this.config.markets);
       this.#lastCatalogRefresh = now.getTime();
+      try {
+        await this.catalog.refresh(this.providers, this.config.markets);
+      } catch (error) {
+        this.logger.warn(
+          { err: error },
+          'Catalog refresh failed; continuing with persisted catalog',
+        );
+      }
     }
     const markets = await this.database.market.findMany({
       where: {
@@ -119,16 +128,29 @@ export class ObservationLoop {
         instrument: { canonicalSymbol: { in: [...this.config.markets] } },
       },
     });
-    const books = await Promise.all(
-      markets.map(async (market) => {
+    const books = await this.mapWithConcurrency(
+      markets,
+      Math.min(4, Math.max(1, this.providers.length * 2)),
+      async (market) => {
         const provider = this.providers.find(
           (candidate) => candidate.venue.id === market.venueId,
         );
         if (!provider) return false;
-        return this.store.storeOrderBook(
-          await provider.fetchOrderBook(market.id, this.config.orderBookDepth),
-        );
-      }),
+        try {
+          return await this.store.storeOrderBook(
+            await provider.fetchOrderBook(
+              market.id,
+              this.config.orderBookDepth,
+            ),
+          );
+        } catch (error) {
+          this.logger.warn(
+            { err: error, marketId: market.id, venueId: market.venueId },
+            'Order-book capture failed',
+          );
+          return false;
+        }
+      },
     );
     const results = await this.opportunities.evaluateAll(
       this.config.detector,
@@ -137,6 +159,7 @@ export class ObservationLoop {
     this.#status.cycles += 1;
     this.#status.consecutiveFailures = 0;
     this.#status.orderBooks = books.filter(Boolean).length;
+    this.#status.orderBookFailures = books.length - this.#status.orderBooks;
     this.#status.evaluations = results.length;
     this.#status.observed = results.filter(
       (result) => result.classification === 'observed',
@@ -162,6 +185,25 @@ export class ObservationLoop {
     this.#status.lastCompletedAt = new Date().toISOString();
     this.#status.lastSuccessAt = this.#status.lastCompletedAt;
     delete this.#status.lastError;
+  }
+
+  private async mapWithConcurrency<T, R>(
+    values: readonly T[],
+    concurrency: number,
+    operation: (value: T) => Promise<R>,
+  ): Promise<R[]> {
+    const results = new Array<R>(values.length);
+    let next = 0;
+    const worker = async () => {
+      while (next < values.length) {
+        const index = next++;
+        results[index] = await operation(values[index]!);
+      }
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(concurrency, values.length) }, worker),
+    );
+    return results;
   }
 
   private schedule(delay: number): void {

@@ -163,13 +163,87 @@ describe('ObservationLoop', () => {
     });
   });
 
+  it('isolates catalog and individual market timeouts from the cycle', async () => {
+    const markets = [
+      { id: 'BINANCE:BTCUSDT', venueId: 'BINANCE' },
+      { id: 'BINANCE:ETHUSDT', venueId: 'BINANCE' },
+      { id: 'KRAKEN:XETHZUSD', venueId: 'KRAKEN' },
+    ];
+    const successfulBook = { marketId: markets[1]!.id };
+    const providers = [
+      {
+        venue: { id: 'BINANCE' },
+        fetchOrderBook: vi
+          .fn()
+          .mockRejectedValueOnce(new Error('exchange operation timed out'))
+          .mockResolvedValueOnce(successfulBook),
+      },
+      {
+        venue: { id: 'KRAKEN' },
+        fetchOrderBook: vi
+          .fn()
+          .mockRejectedValue(new Error('exchange operation timed out')),
+      },
+    ];
+    const storeOrderBook = vi.fn().mockResolvedValue(true);
+    const evaluateAll = vi
+      .fn()
+      .mockResolvedValue([{ classification: 'observed' }]);
+    const logger = { info: vi.fn(), error: vi.fn(), warn: vi.fn() };
+    const loop = new ObservationLoop(
+      {
+        market: { findMany: vi.fn().mockResolvedValue(markets) },
+      } as unknown as DatabaseClient,
+      providers as unknown as ConstructorParameters<typeof ObservationLoop>[1],
+      {
+        refresh: vi
+          .fn()
+          .mockRejectedValue(new Error('catalog request timed out')),
+      } as unknown as MarketCatalog,
+      { storeOrderBook } as unknown as MarketEventStore,
+      { evaluateAll } as unknown as ObservedOpportunityService,
+      {
+        intervalMs: 10_000,
+        catalogRefreshMs: 60_000,
+        orderBookDepth: 100,
+        maxBackoffMs: 60_000,
+        markets: ['BTC/USDT', 'ETH/USDT'],
+        detector: {
+          id: 'cross-venue-observed',
+          version: '1.0.0',
+          maximumBookAgeMs: 5_000,
+          maximumCrossVenueSkewMs: 1_000,
+          minimumObservedSpread: '0',
+        },
+      },
+      logger as unknown as Logger,
+    );
+
+    await loop.runOnce(new Date('2026-07-18T00:00:00Z'));
+
+    expect(storeOrderBook).toHaveBeenCalledOnce();
+    expect(evaluateAll).toHaveBeenCalledOnce();
+    expect(logger.warn).toHaveBeenCalledTimes(3);
+    expect(loop.status()).toMatchObject({
+      cycles: 1,
+      consecutiveFailures: 0,
+      orderBooks: 1,
+      orderBookFailures: 2,
+      evaluations: 1,
+    });
+  });
+
   it('starts only one cycle and enters bounded backoff after failure', async () => {
     vi.useFakeTimers();
-    const refresh = vi
-      .fn()
-      .mockRejectedValue(new Error('exchange unavailable'));
+    const refresh = vi.fn().mockResolvedValue([]);
     const loop = new ObservationLoop(
-      { market: { findMany: vi.fn() } } as unknown as DatabaseClient,
+      {
+        market: {
+          findMany: vi
+            .fn()
+            .mockRejectedValue(new Error('database unavailable')),
+        },
+      } as unknown as DatabaseClient,
       [],
       { refresh } as unknown as MarketCatalog,
       {} as MarketEventStore,
@@ -199,7 +273,7 @@ describe('ObservationLoop', () => {
     expect(loop.status()).toMatchObject({
       state: 'backoff',
       consecutiveFailures: 1,
-      lastError: 'exchange unavailable',
+      lastError: 'database unavailable',
     });
     await loop.stop();
   });
