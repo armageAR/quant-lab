@@ -101,8 +101,9 @@ export function BacktestConsole(props: {
   const refreshRuns = async () => {
     try {
       setRuns(await request<Run[]>('/backtests/runs'));
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'API unavailable');
+      setMessage('');
+    } catch {
+      /* polling errors are transient — keep current state */
     }
   };
   useEffect(() => {
@@ -161,14 +162,14 @@ export function BacktestConsole(props: {
         request?: ReturnType<typeof payload>;
       };
       if (reviewed.sweep && reviewed.request) {
-        const base = reviewed.request;
+        const { configuration, ...rest } = reviewed.request;
         const queued = await request<Run[]>('/backtests/sweeps', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
-            ...base,
+            ...rest,
             configurations: ['base', 'conservative', 'adverse'].map(
-              (scenario) => ({ ...base.configuration, scenario }),
+              (scenario) => ({ ...configuration, scenario }),
             ),
           }),
         });
@@ -208,11 +209,13 @@ export function BacktestConsole(props: {
     });
   const compare = () =>
     mutate(async () => {
-      if (selected.length < 2 || selected.length > 10)
-        throw new Error('Select between 2 and 10 runs.');
-      setComparison(
-        await request(`/backtests/compare?ids=${selected.join(',')}`),
+      if (selected.length < 2)
+        throw new Error('Select at least 2 runs to compare.');
+      setComparison(undefined);
+      const result = await request(
+        `/backtests/compare?ids=${selected.slice(0, 10).join(',')}`,
       );
+      setComparison(result);
       setTab('compare');
     });
 
