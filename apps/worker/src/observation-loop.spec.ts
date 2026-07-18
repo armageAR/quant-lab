@@ -4,7 +4,6 @@ import type {
   MarketEventStore,
   ObservedOpportunityService,
 } from '@quant-lab/market-ingestion';
-import type { OrderBook } from '@quant-lab/market-data';
 import type { Logger } from 'pino';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -27,23 +26,24 @@ describe('ObservationLoop', () => {
       getTradingRules: vi.fn(),
       getEffectiveFees: vi.fn(),
       getCapabilities: vi.fn(),
-      fetchOrderBook: vi
-        .fn()
-        .mockResolvedValue({ marketId: market.id } as unknown as OrderBook),
+      fetchOrderBook: vi.fn().mockResolvedValue({ marketId: market.id }),
     }));
+    const refresh = vi.fn().mockResolvedValue([]);
     const catalog = {
-      refresh: vi.fn().mockResolvedValue([]),
+      refresh,
     } as unknown as MarketCatalog;
+    const storeOrderBook = vi.fn().mockResolvedValue(true);
     const store = {
-      storeOrderBook: vi.fn().mockResolvedValue(true),
+      storeOrderBook,
     } as unknown as MarketEventStore;
+    const evaluateAll = vi
+      .fn()
+      .mockResolvedValue([
+        { classification: 'observed' },
+        { classification: 'rejected' },
+      ]);
     const opportunities = {
-      evaluateAll: vi
-        .fn()
-        .mockResolvedValue([
-          { classification: 'observed' },
-          { classification: 'rejected' },
-        ]),
+      evaluateAll,
     } as unknown as ObservedOpportunityService;
     const loop = new ObservationLoop(
       database,
@@ -70,9 +70,9 @@ describe('ObservationLoop', () => {
 
     await loop.runOnce(new Date('2026-07-18T00:00:00Z'));
 
-    expect(catalog.refresh).toHaveBeenCalledOnce();
-    expect(store.storeOrderBook).toHaveBeenCalledTimes(2);
-    expect(opportunities.evaluateAll).toHaveBeenCalledOnce();
+    expect(refresh).toHaveBeenCalledOnce();
+    expect(storeOrderBook).toHaveBeenCalledTimes(2);
+    expect(evaluateAll).toHaveBeenCalledOnce();
     expect(loop.status()).toMatchObject({
       cycles: 1,
       orderBooks: 2,
