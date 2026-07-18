@@ -1,4 +1,5 @@
 import { InfoButton } from '../components/info-button';
+import { grossProfitFor100 } from '../lib/gross-profit';
 import { formatDateTime } from '../lib/time';
 import { OpportunitiesTable, type OpportunityRow } from './opportunities-table';
 
@@ -94,6 +95,7 @@ function rows(
       classification: item.classification,
       evaluatedAt: item.evaluatedAt,
       spread: item.observedSpread,
+      grossProfit100: grossProfitFor100(item.observedSpread),
       detail:
         item.classification === 'rejected'
           ? (item.rejectionReason ?? 'Sin motivo informado')
@@ -107,6 +109,7 @@ function rows(
       classification: item.classification,
       evaluatedAt: item.evaluatedAt,
       spread: item.topOfBookSpread,
+      grossProfit100: grossProfitFor100(item.topOfBookSpread),
       netProfit: item.netProfit,
       detail:
         item.classification === 'executable'
@@ -137,9 +140,11 @@ export default async function OpportunitiesPage() {
         </div>
         <InfoButton title="Cómo interpretar oportunidades">
           <p>
-            <strong>Observed</strong> indica spread bruto, no ganancia.{' '}
-            <strong>Executable</strong> sobrevivió fees, profundidad, slippage y
-            restricciones bajo la configuración actual.
+            <strong>Observed</strong> indica spread bruto.{' '}
+            <strong>Gcia. USD 100</strong> proyecta una compra-venta de USD 100
+            usando solo ese spread, sin fees, slippage, profundidad ni
+            restricciones. <strong>Executable</strong> sí evalúa esas
+            condiciones bajo la configuración actual.
           </p>
           <p>
             <strong>Missed</strong> fue bloqueada por tamaño, inventario o

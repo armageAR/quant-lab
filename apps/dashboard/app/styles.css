@@ -267,7 +267,7 @@ main {
 }
 table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 1325px;
   table-layout: fixed;
   border-collapse: collapse;
   font-size: 12px;
@@ -338,6 +338,10 @@ tbody tr:hover {
 .numeric {
   font-family: var(--font-mono);
   text-align: right;
+}
+.gross-profit {
+  color: var(--signal);
+  font-weight: 700;
 }
 .detail-cell {
   overflow: hidden;

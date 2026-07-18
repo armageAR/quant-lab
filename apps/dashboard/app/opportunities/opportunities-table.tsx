@@ -10,6 +10,7 @@ export interface OpportunityRow {
   detail: string;
   direction: string;
   evaluatedAt: string;
+  grossProfit100?: string;
   id: string;
   netProfit?: string;
   source: 'observed' | 'executable';
@@ -23,6 +24,7 @@ type SortKey = keyof Pick<
   | 'detail'
   | 'direction'
   | 'evaluatedAt'
+  | 'grossProfit100'
   | 'netProfit'
   | 'source'
   | 'spread'
@@ -36,6 +38,7 @@ const columns: Array<[SortKey, string]> = [
   ['source', 'Etapa'],
   ['classification', 'Resultado'],
   ['spread', 'Spread'],
+  ['grossProfit100', 'Gcia. USD 100'],
   ['netProfit', 'Neto'],
   ['detail', 'Detalle'],
 ];
@@ -47,6 +50,8 @@ function compare(a: OpportunityRow, b: OpportunityRow, key: SortKey): number {
     );
   if (key === 'spread' || key === 'netProfit')
     return Number(a[key] ?? 0) - Number(b[key] ?? 0);
+  if (key === 'grossProfit100')
+    return Number(a.spread ?? 0) - Number(b.spread ?? 0);
   return String(a[key] ?? '').localeCompare(String(b[key] ?? ''), 'es');
 }
 
@@ -182,6 +187,7 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
             <col className="column-result" />
             <col className="column-number" />
             <col className="column-number" />
+            <col className="column-number" />
             <col className="column-detail" />
           </colgroup>
           <thead>
@@ -222,6 +228,9 @@ export function OpportunitiesTable({ rows }: { rows: OpportunityRow[] }) {
                   </span>
                 </td>
                 <td className="numeric">{row.spread ?? '—'}</td>
+                <td className="numeric gross-profit">
+                  {row.grossProfit100 ?? '—'}
+                </td>
                 <td className="numeric">{row.netProfit ?? '—'}</td>
                 <td className="detail-cell" title={row.detail}>
                   {row.detail}
