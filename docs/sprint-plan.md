@@ -557,6 +557,10 @@ Delivery order:
 
 **Sprint 6.5 status:** complete on branch `agent/phase-6-strategy-ibkr`.
 
+**Sprint 6.6 implementation status:** complete on branch
+`agent/phase-6-strategy-ibkr`. The credential-backed bounded campaign remains an
+operator verification requiring a running IBKR paper Gateway.
+
 ADRs, CEDEARs, BYMA, Argentine brokers, and live IBKR orders are explicitly
 deferred.
 

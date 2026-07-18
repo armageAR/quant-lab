@@ -44,6 +44,14 @@ export const ibkrConfigSchema = z
     IBKR_REGULAR_TRADING_HOURS_ONLY: booleanValue.default(true),
   })
   .superRefine((config, context) => {
+    if (
+      config.IBKR_PAPER_EXECUTION_ENABLED &&
+      !config.IBKR_CONNECTIVITY_ENABLED
+    )
+      context.addIssue({
+        code: 'custom',
+        message: 'paper execution requires connectivity',
+      });
     if (!config.IBKR_CONNECTIVITY_ENABLED) return;
     if (!config.IBKR_PAPER_ENABLED)
       context.addIssue({
