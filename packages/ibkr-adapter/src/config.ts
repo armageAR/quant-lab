@@ -8,6 +8,8 @@ const booleanValue = z
 export const ibkrConfigSchema = z
   .object({
     IBKR_CONNECTIVITY_ENABLED: booleanValue.default(false),
+    IBKR_ENVIRONMENT: z.enum(['paper', 'live-readonly']).default('paper'),
+    IBKR_READ_ONLY: booleanValue.default(true),
     IBKR_PAPER_ENABLED: booleanValue.default(false),
     IBKR_PAPER_EXECUTION_ENABLED: booleanValue.default(false),
     IBKR_HOST: z.string().min(1).default('127.0.0.1'),
@@ -53,15 +55,29 @@ export const ibkrConfigSchema = z
         message: 'paper execution requires connectivity',
       });
     if (!config.IBKR_CONNECTIVITY_ENABLED) return;
-    if (!config.IBKR_PAPER_ENABLED)
+    const isPaper = config.IBKR_ENVIRONMENT === 'paper';
+    const allowedPorts = isPaper ? [4002, 7497] : [4001, 7496];
+    if (isPaper && !config.IBKR_PAPER_ENABLED)
       context.addIssue({
         code: 'custom',
         message: 'IBKR paper mode is required',
       });
-    if (!config.IBKR_PORT || ![4002, 7497].includes(config.IBKR_PORT))
+    if (!config.IBKR_PORT || !allowedPorts.includes(config.IBKR_PORT))
       context.addIssue({
         code: 'custom',
-        message: 'IBKR_PORT must be a paper port (4002 or 7497)',
+        message: isPaper
+          ? 'IBKR_PORT must be a paper port (4002 or 7497)'
+          : 'IBKR_PORT must be a live port (4001 or 7496)',
+      });
+    if (!isPaper && !config.IBKR_READ_ONLY)
+      context.addIssue({
+        code: 'custom',
+        message: 'live connectivity requires IBKR_READ_ONLY=true',
+      });
+    if (!isPaper && config.IBKR_PAPER_EXECUTION_ENABLED)
+      context.addIssue({
+        code: 'custom',
+        message: 'paper execution is forbidden in live-readonly mode',
       });
     if (config.IBKR_CLIENT_ID === undefined)
       context.addIssue({

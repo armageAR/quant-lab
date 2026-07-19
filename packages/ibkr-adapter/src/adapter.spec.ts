@@ -73,4 +73,32 @@ describe('IbkrReadOnlyAdapter', () => {
       new IbkrReadOnlyAdapter(config, client(['DU999'])).verify(),
     ).rejects.toThrow('not managed');
   });
+
+  it('allows a live account only through the explicit read-only profile', async () => {
+    const live = loadIbkrConfig({
+      IBKR_CONNECTIVITY_ENABLED: 'true',
+      IBKR_ENVIRONMENT: 'live-readonly',
+      IBKR_READ_ONLY: 'true',
+      IBKR_PAPER_EXECUTION_ENABLED: 'false',
+      IBKR_HOST: '127.0.0.1',
+      IBKR_PORT: '4001',
+      IBKR_CLIENT_ID: '12',
+      IBKR_ACCOUNT_ID: 'U123',
+      IBKR_CONTRACT_IDS: '756733',
+    });
+    await expect(
+      new IbkrReadOnlyAdapter(live, client(['U123'])).verify(),
+    ).resolves.toMatchObject({ environment: 'live-readonly' });
+    expect(() =>
+      loadIbkrConfig({
+        ...process.env,
+        IBKR_CONNECTIVITY_ENABLED: 'true',
+        IBKR_ENVIRONMENT: 'live-readonly',
+        IBKR_READ_ONLY: 'false',
+        IBKR_PORT: '4001',
+        IBKR_CLIENT_ID: '12',
+        IBKR_ACCOUNT_ID: 'U123',
+      }),
+    ).toThrow('IBKR_READ_ONLY=true');
+  });
 });

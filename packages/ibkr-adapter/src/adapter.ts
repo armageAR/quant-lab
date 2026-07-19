@@ -11,11 +11,8 @@ export class IbkrReadOnlyAdapter {
   ) {}
 
   async verify(): Promise<IbkrDiagnostic> {
-    if (
-      !this.config.IBKR_CONNECTIVITY_ENABLED ||
-      !this.config.IBKR_PAPER_ENABLED
-    )
-      throw new Error('IBKR paper connectivity is disabled');
+    if (!this.config.IBKR_CONNECTIVITY_ENABLED)
+      throw new Error('IBKR connectivity is disabled');
     const started = Date.now();
     await this.client.connect();
     try {
@@ -25,7 +22,7 @@ export class IbkrReadOnlyAdapter {
       ]);
       if (!accounts.includes(this.config.IBKR_ACCOUNT_ID!))
         throw new Error(
-          'configured IBKR paper account is not managed by this session',
+          'configured IBKR account is not managed by this session',
         );
       const contracts = await Promise.all(
         this.config.IBKR_CONTRACT_IDS.map((conId) =>
@@ -34,7 +31,7 @@ export class IbkrReadOnlyAdapter {
       );
       return {
         status: 'ok',
-        environment: 'paper',
+        environment: this.config.IBKR_ENVIRONMENT,
         serverTime: serverTime.toISOString(),
         accountMatched: true,
         managedAccountCount: accounts.length,

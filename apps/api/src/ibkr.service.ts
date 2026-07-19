@@ -26,7 +26,7 @@ export interface IbkrContractView {
 
 export interface IbkrRefreshView {
   status: 'ok';
-  environment: 'paper';
+  environment: 'paper' | 'live-readonly';
   serverTime: string;
   contractCount: number;
   latencyMs: number;
@@ -85,8 +85,8 @@ export class IbkrService {
 
   async refreshHistory(): Promise<{ requestId: string; stored: number }> {
     const config = loadIbkrConfig(process.env);
-    if (!config.IBKR_CONNECTIVITY_ENABLED || !config.IBKR_PAPER_ENABLED)
-      throw new Error('IBKR paper connectivity is disabled');
+    if (!config.IBKR_CONNECTIVITY_ENABLED)
+      throw new Error('IBKR connectivity is disabled');
     const client = new TwsIbkrGatewayClient(config);
     const requestId = randomUUID();
     let stored = 0;

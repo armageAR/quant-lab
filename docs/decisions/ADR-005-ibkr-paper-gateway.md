@@ -20,6 +20,10 @@ pacing, reconnect, order-id, and account constraints.
   behind interfaces in `@quant-lab/ibkr-adapter`.
 - Use IB Gateway or TWS paper endpoints only. The allowed ports are `4002` and
   `7497`; any other port fails configuration validation.
+- Permit authenticated live market-data diagnostics only through the separate
+  `live-readonly` profile on ports `4001` or `7496`. This profile requires
+  `IBKR_READ_ONLY=true`, forbids paper execution, and is never represented as a
+  paper session.
 - Treat `conId` as the canonical broker instrument identifier. Persist versioned
   contract metadata and map it to domain instruments outside strategy code.
 - Require an explicit paper account, client id, contract allowlist, and connectivity

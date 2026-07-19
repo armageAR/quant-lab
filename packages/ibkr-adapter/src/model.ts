@@ -15,7 +15,7 @@ export interface IbkrContractRecord {
 
 export interface IbkrDiagnostic {
   status: 'ok';
-  environment: 'paper';
+  environment: 'paper' | 'live-readonly';
   serverTime: string;
   accountMatched: true;
   managedAccountCount: number;

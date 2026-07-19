@@ -87,6 +87,7 @@ export class IbkrPaperExecutionProvider {
   private assertEnabled(): void {
     if (
       !this.config.IBKR_CONNECTIVITY_ENABLED ||
+      this.config.IBKR_ENVIRONMENT !== 'paper' ||
       !this.config.IBKR_PAPER_ENABLED ||
       !this.config.IBKR_PAPER_EXECUTION_ENABLED
     )
