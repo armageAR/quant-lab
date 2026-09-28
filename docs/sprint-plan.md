@@ -6,7 +6,9 @@ This document turns the Phase 0-8 roadmap into an executable sequence for one de
 
 The initial product scope is authenticated Binance and Kraken spot-market research for cross-exchange arbitrage. Quant Lab is a single-operator application and does not require application login or multi-user authorization. Exchange credentials and execution controls remain security boundaries.
 
-## Current review
+## Original baseline review (historical)
+
+This section records the gaps identified when planning Phase 1. They have since been addressed or moved into later sprints; it is not a current audit. See the [roadmap](roadmap.md) and sprint status entries below for current scope.
 
 ### What is in place
 
