@@ -1,14 +1,15 @@
 # AI Context
 
-Use this file as stable context before making changes. Do not claim unfinished work exists, and inspect the repository before introducing duplicate abstractions.
+Use this file as stable context before making changes. Check the [roadmap](roadmap.md) and code for current implementation status; design documents include future capabilities. Do not claim unfinished work exists, and inspect the repository before introducing duplicate abstractions.
 
 ## Stable facts
 
 - Quant Lab is multi-market and crypto-first.
-- The current stack is Node.js, TypeScript, NestJS, Next.js, React, Tailwind CSS, TanStack Query, ECharts, PostgreSQL, Prisma, pnpm, Turborepo, Zod, Pino, Docker, and CCXT.
+- Implemented dependencies include Node.js, TypeScript, NestJS, Next.js, React, PostgreSQL, Prisma, pnpm, Turborepo, Zod, Pino, CCXT, WebSockets, decimal.js, and Vitest. Verify package manifests before adding a technology to public-facing descriptions.
 - Binance and Kraken are the initial venues.
 - Interactive Brokers is a future support target.
 - Redis and BullMQ are planned infrastructure, not current requirements.
+- Market ingestion, cross-exchange opportunity research, and deterministic backtesting are described as implemented in the roadmap. Paper trading, a full strategy plugin lifecycle, and controlled live execution remain distinct roadmap stages.
 - The monorepo boundary is `apps/`, `packages/`, `prisma/`, `docker/`, `docs/`, `scripts/`, and `.github/workflows/`.
 
 ## Research lifecycle
@@ -48,6 +49,11 @@ Live execution is never the default next step after a strategy is written.
 - Live execution is disabled by default.
 - Do not expose exchange credentials to the frontend.
 - Treat risk controls, reconciliation, audit logs, and kill-switch behavior as first-class requirements.
+
+## AI-assisted development
+
+- The sprint plan is structured for one developer working with an AI coding agent. Treat generated code as a proposal: inspect it, review architecture boundaries, run the relevant quality gate, and document acceptance evidence.
+- Do not claim a specific AI coding product was used unless the project history supports that claim.
 
 ## Documentation and testing
 
