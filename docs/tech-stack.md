@@ -1,53 +1,27 @@
 # Tech Stack
 
-## Current target stack
+This page distinguishes dependencies used by the repository from planned integrations. A package's presence does not mean that every stage of the research lifecycle is complete.
 
-### Backend
+## Implemented stack
 
-- Node.js
-- TypeScript
-- NestJS
-- Zod
-- Pino
+| Area | Technology | Use |
+| --- | --- | --- |
+| API and worker | Node.js, TypeScript, NestJS | HTTP orchestration and background research jobs |
+| Configuration and logs | Zod, Pino | Validated settings, structured logs, and redaction |
+| Dashboard | Next.js, React | Research and operator views |
+| Persistence | PostgreSQL, Prisma | Market records, research evidence, and migrations |
+| Market connectivity | CCXT, WebSockets, REST | Read-only Binance/Kraken adapters, streaming, and backfill |
+| Quantitative calculations | decimal.js | Explicit financial precision in research and simulation |
+| Workspace | pnpm, Turborepo | Monorepo builds and package boundaries |
+| Quality | Vitest, ESLint, Prettier, GitHub Actions | Unit and integration checks, builds, and CI |
 
-### Frontend
+The [roadmap](roadmap.md) describes which product capabilities are complete. The first market is crypto spot; Binance and Kraken are the initial venues. Live order execution is not an implemented product capability.
 
-- Next.js
-- React
-- Tailwind CSS
-- TanStack Query
-- ECharts
+## Planned or later-stage work
 
-### Data
+- Redis and BullMQ for durable queue orchestration.
+- Additional exchanges such as Coinbase, OKX, and Bybit.
+- Interactive Brokers and non-crypto asset classes.
+- Controlled live execution after paper trading and risk validation.
 
-- PostgreSQL
-- Prisma
-
-### Tooling and infrastructure
-
-- pnpm
-- Turborepo
-- CCXT
-
-## Planned infrastructure
-
-- Redis
-- BullMQ
-
-## Market connectivity
-
-- Binance
-- Kraken
-
-## Future expansion
-
-- Interactive Brokers
-- Coinbase
-- OKX
-- Bybit
-
-## Execution model
-
-- Backtesting before paper trading
-- Paper trading before live execution
-- Controlled live execution only after approval and risk validation
+Some older design documents describe target architecture. Check the roadmap and current code before describing a planned component as implemented.
