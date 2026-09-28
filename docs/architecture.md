@@ -2,6 +2,8 @@
 
 ## High-level overview
 
+The diagram below is the target research lifecycle, including stages that are still planned. It is not a map of currently available trading capabilities. Consult the [roadmap](roadmap.md) for implementation status; live execution is disabled by default.
+
 Quant Lab is a Turborepo monorepo organized around a small set of applications and focused packages. The architecture keeps venue-specific code, strategy logic, simulation, persistence, and orchestration separate so each concern can evolve independently.
 
 ```mermaid
